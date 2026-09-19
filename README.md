@@ -56,22 +56,38 @@ laptop with 8 GB of RAM. You can swap the LLM via `ARCHIVE_LLM_MODEL`:
 
 ## Run it
 
-**Backend** (from `backend/`):
+From the **project root**, use the launcher scripts (they handle directories
+and sanity checks for you). Run each in its own terminal:
 
 ```bash
-python3 -m venv .venv
-./.venv/bin/pip install -r requirements.txt
-./.venv/bin/uvicorn app.main:app --reload --port 8000
-```
-
-**Frontend** (from `frontend/`):
-
-```bash
-npm install
-npm run dev
+./run_backend.sh     # starts FastAPI on http://localhost:8000
+./run_frontend.sh    # starts Next.js on http://localhost:3000
 ```
 
 Open http://localhost:3000. Upload documents, click index, then Ask or Search.
+
+### First-time setup
+
+The scripts assume the backend venv and frontend deps exist. If starting fresh:
+
+```bash
+# backend deps
+python3 -m venv backend/.venv
+backend/.venv/bin/pip install -r backend/requirements.txt
+
+# frontend deps (run_frontend.sh also does this automatically if missing)
+cd frontend && npm install && cd ..
+```
+
+### Running manually (without the scripts)
+
+```bash
+# backend — must be run from inside backend/
+cd backend && ./.venv/bin/uvicorn app.main:app --port 8000
+
+# frontend — must be run from inside frontend/
+cd frontend && npm run dev
+```
 
 ## Configuration
 
