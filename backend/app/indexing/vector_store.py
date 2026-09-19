@@ -4,6 +4,7 @@ Uses a persistent client so the index survives restarts. Embeddings are
 supplied explicitly (computed via Ollama) rather than letting Chroma pick a
 default embedder, so the whole pipeline stays local and consistent.
 """
+
 from __future__ import annotations
 
 import chromadb
@@ -26,17 +27,31 @@ class VectorStore:
         )
 
     # -- write -------------------------------------------------------------
-    def add_chunks(self, chunks: list[Chunk]) -> int:
+    def add_chunks(
+        self, chunks: list[Chunk], progress=None, batch_size: int = 64
+    ) -> int:
+        """Embed and upsert chunks in batches.
+
+        ``progress`` is an optional callable(done, total) invoked after each
+        batch so long-running indexing jobs can report status.
+        """
         if not chunks:
             return 0
-        embeddings = ollama_client.embed_texts([c.text for c in chunks])
-        self._collection.upsert(
-            ids=[c.id for c in chunks],
-            documents=[c.text for c in chunks],
-            metadatas=[c.to_metadata() for c in chunks],
-            embeddings=embeddings,
-        )
-        return len(chunks)
+        total = len(chunks)
+        done = 0
+        for start in range(0, total, batch_size):
+            batch = chunks[start : start + batch_size]
+            embeddings = ollama_client.embed_texts([c.text for c in batch])
+            self._collection.upsert(
+                ids=[c.id for c in batch],
+                documents=[c.text for c in batch],
+                metadatas=[c.to_metadata() for c in batch],
+                embeddings=embeddings,
+            )
+            done += len(batch)
+            if progress:
+                progress(done, total)
+        return total
 
     def delete_by_source(self, source_path: str) -> None:
         self._collection.delete(where={"source_path": source_path})

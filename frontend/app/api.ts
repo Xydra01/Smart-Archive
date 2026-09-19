@@ -69,10 +69,51 @@ export async function uploadFiles(files: FileList): Promise<{ saved: string[]; s
   return r.json();
 }
 
-export async function indexAll(): Promise<any> {
+export interface IndexStatus {
+  status: "idle" | "pending" | "running" | "done" | "error";
+  total_files?: number;
+  processed_files?: number;
+  current_file?: string | null;
+  total_chunks?: number;
+  file_chunk_done?: number;
+  file_chunk_total?: number;
+  message?: string;
+  error?: string | null;
+  elapsed_s?: number;
+}
+
+export async function startIndex(): Promise<{ job_id: string; status: string }> {
   const r = await fetch("/api/index", { method: "POST" });
-  if (!r.ok) throw new Error("index failed");
+  if (!r.ok) throw new Error("failed to start indexing");
   return r.json();
+}
+
+export async function getIndexStatus(jobId?: string): Promise<IndexStatus> {
+  const url = jobId ? `/api/index/status?job_id=${jobId}` : "/api/index/status";
+  const r = await fetch(url);
+  if (!r.ok) throw new Error("status check failed");
+  return r.json();
+}
+
+// Starts indexing and polls until done/error, reporting progress via onProgress.
+export async function indexAll(
+  onProgress?: (s: IndexStatus) => void
+): Promise<IndexStatus> {
+  const { job_id } = await startIndex();
+  return new Promise((resolve, reject) => {
+    const poll = async () => {
+      try {
+        const s = await getIndexStatus(job_id);
+        onProgress?.(s);
+        if (s.status === "done") resolve(s);
+        else if (s.status === "error") reject(new Error(s.error || "indexing error"));
+        else setTimeout(poll, 1000);
+      } catch (e) {
+        reject(e);
+      }
+    };
+    poll();
+  });
 }
 
 // Streams the RAG answer. Calls onCitations once, then onToken for each delta.

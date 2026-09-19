@@ -67,13 +67,20 @@ def _ollama_reachable() -> bool:
 # --------------------------------------------------------------------------
 # Embeddings
 # --------------------------------------------------------------------------
-def embed_texts(texts: list[str]) -> list[list[float]]:
-    """Embed a batch of texts with the configured embedding model."""
+def embed_texts(texts: list[str], batch_size: int = 64) -> list[list[float]]:
+    """Embed texts with the configured embedding model, in batches.
+
+    Batching dramatically speeds up indexing large documents: one Ollama call
+    per ``batch_size`` chunks instead of one call per chunk.
+    """
+    if not texts:
+        return []
     client = _client()
     vectors: list[list[float]] = []
-    for text in texts:
-        resp = client.embeddings(model=settings.embed_model, prompt=text)
-        vectors.append(resp["embedding"])
+    for start in range(0, len(texts), batch_size):
+        batch = texts[start : start + batch_size]
+        resp = client.embed(model=settings.embed_model, input=batch)
+        vectors.extend(resp["embeddings"])
     return vectors
 
 

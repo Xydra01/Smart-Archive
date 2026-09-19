@@ -77,9 +77,22 @@ export default function Home() {
     setNotice("Uploading…");
     try {
       const up = await uploadFiles(files);
-      setNotice(`Uploaded ${up.saved.length} file(s). Indexing…`);
-      const res = await indexAll();
-      setNotice(`Indexed. ${res.total_chunks} total chunks in archive.`);
+      setNotice(`Uploaded ${up.saved.length} file(s). Starting indexing…`);
+      const res = await indexAll((s) => {
+        if (s.status === "running") {
+          const filePart = s.current_file ? ` — ${s.current_file}` : "";
+          const chunkPart =
+            s.file_chunk_total && s.file_chunk_total > 0
+              ? ` (${s.file_chunk_done}/${s.file_chunk_total} chunks)`
+              : " (reading…)";
+          setNotice(
+            `Indexing ${s.processed_files}/${s.total_files}${filePart}${chunkPart}`
+          );
+        } else if (s.message) {
+          setNotice(s.message);
+        }
+      });
+      setNotice(res.message || `Indexed. ${res.total_chunks} chunks in archive.`);
       refreshStatus();
     } catch (e: any) {
       setNotice(`Upload/index failed: ${e.message ?? e}`);

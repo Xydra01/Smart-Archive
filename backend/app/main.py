@@ -12,6 +12,7 @@ POST /api/ask               RAG answer (streaming) with citations
 DELETE /api/source          remove one source from the index
 POST /api/reset             wipe the whole index
 """
+
 from __future__ import annotations
 
 import json
@@ -25,6 +26,7 @@ from pydantic import BaseModel
 
 from .config import settings
 from .indexing import indexer
+from .indexing.jobs import manager as job_manager
 from .indexing.vector_store import get_store
 from .ingestion.loaders import SUPPORTED_EXTENSIONS
 from .llm import ollama_client, rag
@@ -98,7 +100,28 @@ async def upload(files: list[UploadFile] = File(...)) -> dict:
 
 @app.post("/api/index")
 def index_all() -> dict:
-    return indexer.index_raw_dir()
+    """Start indexing all files in data/raw as a background job.
+
+    Returns immediately with a job id; poll /api/index/status for progress.
+    Large files (e.g. a 1000-page PDF -> thousands of chunks) can take minutes,
+    so this must not block the request.
+    """
+    # Avoid launching a second job while one is already running.
+    latest = job_manager.latest()
+    if latest and latest.status == "running":
+        return {"job_id": latest.id, "status": latest.status, "already_running": True}
+
+    job = job_manager.create("index")
+    job_manager.run_in_thread(job, indexer.run_index_job)
+    return {"job_id": job.id, "status": job.status}
+
+
+@app.get("/api/index/status")
+def index_status(job_id: str | None = None) -> dict:
+    job = job_manager.get(job_id) if job_id else job_manager.latest()
+    if job is None:
+        return {"status": "idle", "message": "No indexing job has run yet."}
+    return job.to_dict()
 
 
 class IndexFileRequest(BaseModel):
@@ -109,7 +132,9 @@ class IndexFileRequest(BaseModel):
 def index_one(req: IndexFileRequest) -> dict:
     path = settings.raw_dir / Path(req.filename).name
     if not path.exists():
-        raise HTTPException(status_code=404, detail=f"File not found in raw dir: {req.filename}")
+        raise HTTPException(
+            status_code=404, detail=f"File not found in raw dir: {req.filename}"
+        )
     try:
         return indexer.index_file(path)
     except Exception as e:
