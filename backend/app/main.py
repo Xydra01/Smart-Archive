@@ -69,11 +69,20 @@ def health() -> dict:
 
 @app.get("/api/stats")
 def stats() -> dict:
+    from .indexing.manifest import get_manifest
+
     store = get_store()
+    manifest = get_manifest()
+    entries = manifest.entries()
     return {
         "total_chunks": store.count(),
         "sources": store.sources(),
         "supported_extensions": list(SUPPORTED_EXTENSIONS),
+        "indexed_files": len(entries),
+        "manifest": {
+            rel: {"chunks": e.chunk_count, "size": e.size}
+            for rel, e in sorted(entries.items())
+        },
     }
 
 
@@ -99,12 +108,12 @@ async def upload(files: list[UploadFile] = File(...)) -> dict:
 
 
 @app.post("/api/index")
-def index_all() -> dict:
-    """Start indexing all files in data/raw as a background job.
+def index_all(force: bool = False) -> dict:
+    """Start (bulk) indexing all files in data/raw as a background job.
 
     Returns immediately with a job id; poll /api/index/status for progress.
-    Large files (e.g. a 1000-page PDF -> thousands of chunks) can take minutes,
-    so this must not block the request.
+    Incremental by default — unchanged files (per the manifest) are skipped, so
+    re-running after a restart is cheap. Pass ?force=true to re-embed everything.
     """
     # Avoid launching a second job while one is already running.
     latest = job_manager.latest()
@@ -112,8 +121,28 @@ def index_all() -> dict:
         return {"job_id": latest.id, "status": latest.status, "already_running": True}
 
     job = job_manager.create("index")
-    job_manager.run_in_thread(job, indexer.run_index_job)
-    return {"job_id": job.id, "status": job.status}
+    job_manager.run_in_thread(job, lambda j: indexer.run_index_job(j, force=force))
+    return {"job_id": job.id, "status": job.status, "force": force}
+
+
+class ImportFolderRequest(BaseModel):
+    folder: str
+    # Hard-link instead of copying (saves disk on the same filesystem).
+    hardlink: bool = False
+
+
+@app.post("/api/import-folder")
+def import_folder(req: ImportFolderRequest) -> dict:
+    """Import supported files from an external folder into data/raw.
+
+    Copies (or hard-links) files preserving structure, then you can call
+    /api/index to embed them. Does not index automatically so you can review
+    what was imported first.
+    """
+    try:
+        return indexer.import_folder(Path(req.folder), copy=not req.hardlink)
+    except (NotADirectoryError, ValueError) as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 @app.get("/api/index/status")

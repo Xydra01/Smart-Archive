@@ -7,7 +7,9 @@ import {
   getHealth,
   getStats,
   Health,
+  importFolder,
   indexAll,
+  IndexStatus,
   search,
   SearchHit,
   Stats,
@@ -29,6 +31,8 @@ export default function Home() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [health, setHealth] = useState<Health | null>(null);
   const [notice, setNotice] = useState<string>("");
+  const [indexing, setIndexing] = useState(false);
+  const [folderPath, setFolderPath] = useState("");
   const fileInput = useRef<HTMLInputElement>(null);
 
   async function refreshStatus() {
@@ -72,30 +76,60 @@ export default function Home() {
     }
   }
 
+  function onIndexProgress(s: IndexStatus) {
+    if (s.status === "running") {
+      const filePart = s.current_file ? ` — ${s.current_file}` : "";
+      const chunkPart =
+        s.file_chunk_total && s.file_chunk_total > 0
+          ? ` (${s.file_chunk_done}/${s.file_chunk_total} chunks)`
+          : " (reading…)";
+      const skipPart = s.skipped_files ? `, ${s.skipped_files} skipped` : "";
+      setNotice(
+        `Indexing ${s.processed_files}/${s.total_files}${filePart}${chunkPart}${skipPart}`
+      );
+    } else if (s.message) {
+      setNotice(s.message);
+    }
+  }
+
+  async function runIndex(force = false) {
+    if (indexing) return;
+    setIndexing(true);
+    setNotice(force ? "Re-indexing everything…" : "Indexing new/changed files…");
+    try {
+      const res = await indexAll(onIndexProgress, force);
+      setNotice(res.message || `Done. ${res.total_chunks} chunks in archive.`);
+      refreshStatus();
+    } catch (e: any) {
+      setNotice(`Index failed: ${e.message ?? e}`);
+    } finally {
+      setIndexing(false);
+    }
+  }
+
   async function onUpload(files: FileList | null) {
     if (!files || files.length === 0) return;
     setNotice("Uploading…");
     try {
       const up = await uploadFiles(files);
       setNotice(`Uploaded ${up.saved.length} file(s). Starting indexing…`);
-      const res = await indexAll((s) => {
-        if (s.status === "running") {
-          const filePart = s.current_file ? ` — ${s.current_file}` : "";
-          const chunkPart =
-            s.file_chunk_total && s.file_chunk_total > 0
-              ? ` (${s.file_chunk_done}/${s.file_chunk_total} chunks)`
-              : " (reading…)";
-          setNotice(
-            `Indexing ${s.processed_files}/${s.total_files}${filePart}${chunkPart}`
-          );
-        } else if (s.message) {
-          setNotice(s.message);
-        }
-      });
-      setNotice(res.message || `Indexed. ${res.total_chunks} chunks in archive.`);
-      refreshStatus();
+      await runIndex(false);
     } catch (e: any) {
       setNotice(`Upload/index failed: ${e.message ?? e}`);
+    }
+  }
+
+  async function onImportFolder() {
+    if (!folderPath.trim() || indexing) return;
+    setNotice(`Importing from ${folderPath}…`);
+    try {
+      const imp = await importFolder(folderPath.trim());
+      setNotice(
+        `Imported ${imp.imported} of ${imp.found} file(s) into ${imp.into}. Indexing…`
+      );
+      await runIndex(false);
+    } catch (e: any) {
+      setNotice(`Folder import failed: ${e.message ?? e}`);
     }
   }
 
@@ -251,6 +285,48 @@ export default function Home() {
           style={{ display: "none" }}
           onChange={(e) => onUpload(e.target.files)}
         />
+
+        {/* Import an existing folder from disk */}
+        <div className="searchbar" style={{ marginTop: 16 }}>
+          <input
+            className="input"
+            placeholder="Import a folder path (e.g. /Users/you/Documents/books)"
+            value={folderPath}
+            onChange={(e) => setFolderPath(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && onImportFolder()}
+          />
+          <button
+            className="btn secondary"
+            onClick={onImportFolder}
+            disabled={indexing || !folderPath.trim()}
+          >
+            Import
+          </button>
+        </div>
+
+        {/* Re-index controls */}
+        <div className="modes" style={{ marginTop: 16, marginBottom: 0 }}>
+          <button
+            className="btn secondary"
+            onClick={() => runIndex(false)}
+            disabled={indexing}
+          >
+            {indexing ? <span className="spinner" /> : "Index new / changed"}
+          </button>
+          <button
+            className="btn secondary"
+            onClick={() => runIndex(true)}
+            disabled={indexing}
+            title="Re-embed every file, ignoring the manifest"
+          >
+            Force re-index all
+          </button>
+          {stats && (
+            <span className="muted" style={{ alignSelf: "center", marginLeft: "auto" }}>
+              {stats.indexed_files} file(s) indexed
+            </span>
+          )}
+        </div>
       </div>
     </div>
   );

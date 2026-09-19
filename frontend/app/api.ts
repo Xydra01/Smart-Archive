@@ -25,6 +25,8 @@ export interface Stats {
   total_chunks: number;
   sources: Record<string, number>;
   supported_extensions: string[];
+  indexed_files: number;
+  manifest: Record<string, { chunks: number; size: number }>;
 }
 
 export interface Health {
@@ -73,6 +75,8 @@ export interface IndexStatus {
   status: "idle" | "pending" | "running" | "done" | "error";
   total_files?: number;
   processed_files?: number;
+  skipped_files?: number;
+  removed_files?: number;
   current_file?: string | null;
   total_chunks?: number;
   file_chunk_done?: number;
@@ -82,9 +86,25 @@ export interface IndexStatus {
   elapsed_s?: number;
 }
 
-export async function startIndex(): Promise<{ job_id: string; status: string }> {
-  const r = await fetch("/api/index", { method: "POST" });
+export async function startIndex(force = false): Promise<{ job_id: string; status: string }> {
+  const r = await fetch(`/api/index?force=${force}`, { method: "POST" });
   if (!r.ok) throw new Error("failed to start indexing");
+  return r.json();
+}
+
+export async function importFolder(
+  folder: string,
+  hardlink = false
+): Promise<{ found: number; imported: number; skipped: number; into: string }> {
+  const r = await fetch("/api/import-folder", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ folder, hardlink }),
+  });
+  if (!r.ok) {
+    const detail = await r.json().catch(() => ({}));
+    throw new Error(detail.detail || "folder import failed");
+  }
   return r.json();
 }
 
@@ -97,9 +117,10 @@ export async function getIndexStatus(jobId?: string): Promise<IndexStatus> {
 
 // Starts indexing and polls until done/error, reporting progress via onProgress.
 export async function indexAll(
-  onProgress?: (s: IndexStatus) => void
+  onProgress?: (s: IndexStatus) => void,
+  force = false
 ): Promise<IndexStatus> {
-  const { job_id } = await startIndex();
+  const { job_id } = await startIndex(force);
   return new Promise((resolve, reject) => {
     const poll = async () => {
       try {

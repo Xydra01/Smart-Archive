@@ -9,6 +9,7 @@ This is intentionally simple (single process, in-memory). It's the right fit
 for a local single-user app. For multi-user or restart-durable jobs you'd move
 this to a real task queue.
 """
+
 from __future__ import annotations
 
 import threading
@@ -21,13 +22,15 @@ from typing import Optional
 @dataclass
 class Job:
     id: str
-    kind: str                      # e.g. "index"
-    status: str = "pending"        # pending | running | done | error
+    kind: str  # e.g. "index"
+    status: str = "pending"  # pending | running | done | error
     total_files: int = 0
-    processed_files: int = 0
+    processed_files: int = 0  # files actually (re)indexed
+    skipped_files: int = 0  # unchanged files skipped via manifest
+    removed_files: int = 0  # deleted files pruned from the index
     current_file: Optional[str] = None
-    total_chunks: int = 0          # chunks embedded so far (running total)
-    file_chunk_done: int = 0       # progress within the current file
+    total_chunks: int = 0  # chunks embedded so far (running total)
+    file_chunk_done: int = 0  # progress within the current file
     file_chunk_total: int = 0
     message: str = ""
     error: Optional[str] = None

@@ -89,6 +89,31 @@ cd backend && ./.venv/bin/uvicorn app.main:app --port 8000
 cd frontend && npm run dev
 ```
 
+## Bulk ingest & incremental indexing
+
+The archive is built to hold a lot of material without re-doing work.
+
+- **Incremental indexing.** A manifest (`data/index_manifest.json`) records each
+  indexed file's size, modification time, content hash, and chunk count.
+  Re-running indexing only embeds files that are **new or changed** — unchanged
+  files are skipped in milliseconds. This means restarting or re-indexing a big
+  library doesn't re-embed everything.
+- **Folder import.** Point the archive at an existing folder on disk and it
+  copies (or hard-links) all supported files in, preserving structure:
+
+  ```bash
+  curl -X POST http://localhost:8000/api/import-folder \
+    -H 'Content-Type: application/json' \
+    -d '{"folder": "/Users/you/Documents/books"}'
+  ```
+
+  Or use the "Import a folder path" box in the UI. After importing, click
+  **Index new / changed**.
+- **Force re-index.** To re-embed everything (e.g. after changing chunk
+  settings), use **Force re-index all** in the UI or `POST /api/index?force=true`.
+- **Deletions** are handled automatically: files removed from `data/raw` are
+  pruned from both the vector store and the manifest on the next index run.
+
 ## Configuration
 
 All tunables live in `backend/app/config.py` and can be overridden with

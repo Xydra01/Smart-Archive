@@ -14,7 +14,16 @@ from ..ingestion.chunker import chunk_sections
 from ..ingestion.loaders import load_document, SUPPORTED_EXTENSIONS, UnsupportedFileType
 from .jobs import Job
 from .keyword_index import get_keyword_index
+from .manifest import get_manifest
 from .vector_store import get_store
+
+
+def _rel_path(path: Path) -> str:
+    return (
+        str(path.relative_to(settings.raw_dir))
+        if _is_under(path, settings.raw_dir)
+        else str(path)
+    )
 
 
 def index_file(path: Path, *, progress=None, rebuild_keyword: bool = True) -> dict:
@@ -23,6 +32,8 @@ def index_file(path: Path, *, progress=None, rebuild_keyword: bool = True) -> di
     ``progress`` is an optional callable(done, total, sections, chunks) used to
     report per-file chunk progress. ``rebuild_keyword`` can be set False by the
     batch job so the BM25 index is rebuilt once at the end instead of per file.
+
+    Always (re)indexes; the manifest is updated to reflect the new content.
     """
     if path.suffix.lower() not in SUPPORTED_EXTENSIONS:
         raise UnsupportedFileType(
@@ -41,11 +52,7 @@ def index_file(path: Path, *, progress=None, rebuild_keyword: bool = True) -> di
 
     store = get_store()
     # Re-ingesting a file replaces its previous chunks (idempotent).
-    rel = (
-        str(path.relative_to(settings.raw_dir))
-        if _is_under(path, settings.raw_dir)
-        else str(path)
-    )
+    rel = _rel_path(path)
     store.delete_by_source(rel)
 
     def _cb(done, total):
@@ -53,6 +60,9 @@ def index_file(path: Path, *, progress=None, rebuild_keyword: bool = True) -> di
             progress(done, total, len(sections), len(chunks))
 
     added = store.add_chunks(chunks, progress=_cb)
+
+    # Record in the manifest so future runs can skip this unchanged file.
+    get_manifest().record(path, rel, added)
 
     if rebuild_keyword:
         _rebuild_keyword_index()
@@ -87,15 +97,42 @@ def index_raw_dir() -> dict:
     }
 
 
-def run_index_job(job: Job) -> None:
-    """Index all supported files in the raw dir, updating ``job`` as it goes."""
+def run_index_job(job: Job, *, force: bool = False) -> None:
+    """Bulk-index the raw dir (recursively), updating ``job`` as it goes.
+
+    Incremental by default: files whose size+mtime match the manifest are
+    skipped (no re-embedding). Files that are new or changed get indexed.
+    Deleted files are pruned from both the vector store and the manifest.
+    Set ``force=True`` to re-index everything regardless of the manifest.
+    """
+    manifest = get_manifest()
     files = _supported_files()
     job.total_files = len(files)
+
+    # 1) Prune files that were indexed before but no longer exist on disk.
+    existing_rels = {_rel_path(p) for p in files}
+    for rel in manifest.prune_missing(existing_rels):
+        get_store().delete_by_source(rel)
+        job.removed_files += 1
+
     if not files:
-        job.message = "No supported files found in data/raw."
+        job.message = "Building keyword index…"
+        _rebuild_keyword_index()
+        job.message = (
+            f"No supported files in data/raw. "
+            f"Pruned {job.removed_files} removed file(s)."
+        )
         return
 
+    did_index = False
     for path in files:
+        rel = _rel_path(path)
+
+        # Skip unchanged files unless forced.
+        if not force and manifest.is_unchanged(path, rel):
+            job.skipped_files += 1
+            continue
+
         job.current_file = path.name
         job.file_chunk_done = 0
         job.file_chunk_total = 0
@@ -108,29 +145,95 @@ def run_index_job(job: Job) -> None:
             result = index_file(path, progress=_progress, rebuild_keyword=False)
             job.results.append(result)
             job.total_chunks += result["chunks_indexed"]
+            job.processed_files += 1
+            did_index = True
         except Exception as e:
             job.results.append({"file": path.name, "error": str(e)})
-        job.processed_files += 1
 
-    # Rebuild the keyword index once from the full authoritative set.
-    job.message = "Building keyword index…"
-    _rebuild_keyword_index()
+    # Rebuild the keyword index once, only if the corpus changed.
+    if did_index or job.removed_files:
+        job.message = "Building keyword index…"
+        _rebuild_keyword_index()
+
+    job.current_file = None
     job.message = (
-        f"Indexed {job.processed_files} file(s), {get_store().count()} chunks."
+        f"Indexed {job.processed_files}, skipped {job.skipped_files} unchanged, "
+        f"removed {job.removed_files}. {get_store().count()} chunks total."
     )
 
 
-def _supported_files() -> list[Path]:
+def _supported_files(root: Path | None = None) -> list[Path]:
+    base = root or settings.raw_dir
     return [
         p
-        for p in sorted(settings.raw_dir.rglob("*"))
+        for p in sorted(base.rglob("*"))
         if p.is_file() and p.suffix.lower() in SUPPORTED_EXTENSIONS
     ]
+
+
+def import_folder(folder: Path, *, copy: bool = True) -> dict:
+    """Copy (or hard-link) supported files from an external folder into data/raw.
+
+    Preserves the folder's relative structure under data/raw so bulk-imported
+    documents stay organized and their source paths are meaningful. The actual
+    indexing happens afterward via the normal incremental job, so unchanged
+    files are still skipped.
+
+    Set ``copy=False`` to hard-link instead of copy (saves disk for large
+    collections on the same filesystem; falls back to copy across filesystems).
+    """
+    import shutil
+
+    folder = folder.expanduser().resolve()
+    if not folder.is_dir():
+        raise NotADirectoryError(f"Not a directory: {folder}")
+
+    # Refuse to import the archive's own data dir into itself.
+    if _is_under(folder, settings.raw_dir) or folder == settings.raw_dir:
+        raise ValueError("Cannot import data/raw into itself.")
+
+    src_files = _supported_files(folder)
+    imported = []
+    skipped = []
+    for src in src_files:
+        rel = src.relative_to(folder)
+        dest = settings.raw_dir / folder.name / rel
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        # Skip if an identical-size file is already there (cheap dedupe).
+        if dest.exists() and dest.stat().st_size == src.stat().st_size:
+            skipped.append(str(rel))
+            continue
+        try:
+            if copy:
+                shutil.copy2(src, dest)
+            else:
+                try:
+                    if dest.exists():
+                        dest.unlink()
+                    dest.hardlink_to(src)
+                except OSError:
+                    shutil.copy2(src, dest)  # cross-filesystem fallback
+            imported.append(str(rel))
+        except Exception as e:
+            skipped.append(f"{rel} (error: {e})")
+
+    return {
+        "source_folder": str(folder),
+        "into": str(settings.raw_dir / folder.name),
+        "found": len(src_files),
+        "imported": len(imported),
+        "skipped": len(skipped),
+        "unsupported_note": (
+            f"Scanned recursively; only {len(SUPPORTED_EXTENSIONS)} supported "
+            "extensions were imported."
+        ),
+    }
 
 
 def remove_source(source_path: str) -> dict:
     store = get_store()
     store.delete_by_source(source_path)
+    get_manifest().remove(source_path)
     _rebuild_keyword_index()
     return {"removed": source_path, "total_chunks": store.count()}
 
@@ -138,6 +241,10 @@ def remove_source(source_path: str) -> dict:
 def reset_index() -> dict:
     store = get_store()
     store.reset()
+    # Wipe the manifest so a subsequent index run re-embeds everything.
+    manifest = get_manifest()
+    for rel in list(manifest.entries().keys()):
+        manifest.remove(rel)
     _rebuild_keyword_index()
     return {"reset": True, "total_chunks": store.count()}
 

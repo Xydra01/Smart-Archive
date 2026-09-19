@@ -14,6 +14,9 @@ data/chroma/*
 # BM25 / keyword index artifacts
 data/keyword/*
 !data/keyword/.gitkeep
+# Persistent index manifest (derived state; rebuilt on demand)
+data/index_manifest.json
+data/index_manifest.json.tmp
 # Any local model weights or GGUF files that get downloaded locally
 *.gguf
 *.bin
