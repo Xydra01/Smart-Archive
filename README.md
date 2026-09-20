@@ -1,4 +1,4 @@
-# Archive — Local AI Search Engine
+# Smart Archive — Local AI Search Engine
 
 A fully local, AI-driven hybrid search engine over your personal document
 archive. Ingests many file types, indexes them for **semantic + keyword**
