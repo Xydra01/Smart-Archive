@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Archive — AI Search",
+  title: "Smart Archive",
   description: "Local AI-driven hybrid search over your document archive",
 };
 

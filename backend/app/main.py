@@ -31,7 +31,7 @@ from .indexing.vector_store import get_store
 from .ingestion.loaders import SUPPORTED_EXTENSIONS
 from .llm import ollama_client, rag
 
-app = FastAPI(title="Archive AI Search", version="0.1.0")
+app = FastAPI(title="Smart Archive", version="0.1.0")
 
 # Local-only dev: the Next.js frontend runs on :3000.
 app.add_middleware(

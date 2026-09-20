@@ -146,7 +146,7 @@ export default function Home() {
       <div className="header">
         <div>
           <div className="title">
-            Archive <span>AI Search</span>
+            Smart <span>Archive</span>
           </div>
           <div className="subtitle">
             Hybrid semantic + keyword search over your local archive, curated by
