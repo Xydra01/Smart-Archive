@@ -29,9 +29,13 @@ class Settings(BaseSettings):
     ollama_host: str = "http://localhost:11434"
     # Default LLM: llama3.2:3b — a fast, direct-answering instruct model (~2GB)
     # that runs comfortably on 8GB RAM and doesn't burn tokens on hidden
-    # reasoning. Alternatives (set ARCHIVE_LLM_MODEL):
-    #   qwen3.5:4b                                    (reasoning model, slower)
-    #   MobiusDevelopment/Bonsai-27B-Q1_0-gguf:latest (1-bit 27B; needs >8GB to be fast)
+    # reasoning. Any local Ollama chat model works; swap via ARCHIVE_LLM_MODEL.
+    # A few realistic alternatives by hardware:
+    #   llama3.2:3b                                   (default; fastest, ~2GB)
+    #   qwen3.5:4b                                    (reasoning model, ~3.4GB)
+    #   llama3.1:8b / qwen3.5:8b                       (better answers, ~5-6GB)
+    #   MobiusDevelopment/Bonsai-27B-Q1_0-gguf:latest (1-bit 27B; wants >8GB to be fast)
+    # See the README "Choosing a model" section for a fuller list.
     llm_model: str = "llama3.2:3b"
     embed_model: str = "nomic-embed-text"
 
