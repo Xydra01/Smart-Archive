@@ -8,6 +8,25 @@ cited answers. Nothing leaves your machine.
 The default model is `llama3.2:3b`, but **any local Ollama chat model works** —
 pick one that fits your hardware (see [Choosing a model](#choosing-a-model)).
 
+## Screenshots
+
+**Ask mode** — a synthesized, cited answer up top, followed by per-source
+findings. Here the archive is answering "What is a variable?" from an indexed
+1,100-page textbook:
+
+![Ask mode: synthesized answer with inline citations and a per-source findings
+breakdown](docs/screenshots/ask-view.png)
+
+**Sources & ingest** — every answer links back to the exact source and page,
+and the "Add to archive" panel handles uploads, folder import, and incremental
+re-indexing:
+
+![Sources list with page-level citations, plus the add-to-archive panel for
+uploads and folder import](docs/screenshots/sources-and-ingest.png)
+
+> Note: these screenshots predate the rename, so the header still reads
+> "Archive AI Search" — the app is now titled **Smart Archive**.
+
 ## Stack
 
 | Layer         | Choice                                                  |
