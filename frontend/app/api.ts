@@ -137,11 +137,17 @@ export async function indexAll(
   });
 }
 
-// Streams the RAG answer. Calls onCitations once, then onToken for each delta.
+export type AnswerSection = "summary" | "per_source";
+
+// Streams the RAG answer. Emits citations once, then a section marker before
+// each block of tokens (summary first, then per-source findings).
 export async function ask(
   question: string,
-  onCitations: (c: Citation[]) => void,
-  onToken: (t: string) => void
+  handlers: {
+    onCitations: (c: Citation[]) => void;
+    onSection: (s: AnswerSection) => void;
+    onToken: (section: AnswerSection, t: string) => void;
+  }
 ): Promise<void> {
   const r = await fetch("/api/ask", {
     method: "POST",
@@ -153,6 +159,7 @@ export async function ask(
   const reader = r.body.getReader();
   const decoder = new TextDecoder();
   let buffer = "";
+  let current: AnswerSection = "summary";
 
   while (true) {
     const { done, value } = await reader.read();
@@ -163,8 +170,14 @@ export async function ask(
     for (const line of lines) {
       if (!line.trim()) continue;
       const msg = JSON.parse(line);
-      if (msg.type === "citations") onCitations(msg.data as Citation[]);
-      else if (msg.type === "token") onToken(msg.data as string);
+      if (msg.type === "citations") {
+        handlers.onCitations(msg.data as Citation[]);
+      } else if (msg.type === "section") {
+        current = msg.data as AnswerSection;
+        handlers.onSection(current);
+      } else if (msg.type === "token") {
+        handlers.onToken(current, msg.data as string);
+      }
     }
   }
 }

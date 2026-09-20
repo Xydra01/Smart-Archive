@@ -23,7 +23,8 @@ export default function Home() {
   const [query, setQuery] = useState("");
   const [busy, setBusy] = useState(false);
 
-  const [answer, setAnswer] = useState("");
+  const [summary, setSummary] = useState("");
+  const [perSource, setPerSource] = useState("");
   const [citations, setCitations] = useState<Citation[]>([]);
   const [results, setResults] = useState<SearchHit[]>([]);
   const [streaming, setStreaming] = useState(false);
@@ -51,18 +52,22 @@ export default function Home() {
   async function run() {
     if (!query.trim() || busy) return;
     setBusy(true);
-    setAnswer("");
+    setSummary("");
+    setPerSource("");
     setCitations([]);
     setResults([]);
 
     try {
       if (mode === "ask") {
         setStreaming(true);
-        await ask(
-          query,
-          (c) => setCitations(c),
-          (t) => setAnswer((prev) => prev + t)
-        );
+        await ask(query, {
+          onCitations: (c) => setCitations(c),
+          onSection: () => {},
+          onToken: (section, t) => {
+            if (section === "summary") setSummary((prev) => prev + t);
+            else setPerSource((prev) => prev + t);
+          },
+        });
         setStreaming(false);
       } else {
         const res = await search(query);
@@ -203,13 +208,24 @@ export default function Home() {
 
       {notice && <div className="muted" style={{ marginBottom: 16 }}>{notice}</div>}
 
-      {/* AI answer */}
-      {mode === "ask" && (answer || streaming) && (
+      {/* Synthesized summary */}
+      {mode === "ask" && (summary || streaming) && (
         <div className="panel">
           <div className="section-label">Answer</div>
           <div className="answer">
-            {answer}
-            {streaming && <span className="cursor" />}
+            {summary}
+            {streaming && !perSource && <span className="cursor" />}
+          </div>
+        </div>
+      )}
+
+      {/* Per-source findings */}
+      {mode === "ask" && (perSource || (streaming && summary)) && (
+        <div className="panel">
+          <div className="section-label">Per-source findings</div>
+          <div className="answer">
+            {perSource}
+            {streaming && perSource && <span className="cursor" />}
           </div>
         </div>
       )}
