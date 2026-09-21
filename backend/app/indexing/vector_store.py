@@ -64,13 +64,21 @@ class VectorStore:
         )
 
     # -- read --------------------------------------------------------------
-    def query(self, query_text: str, top_k: int) -> list[dict]:
+    def query(
+        self, query_text: str, top_k: int, where_sources: set[str] | None = None
+    ) -> list[dict]:
         if self.count() == 0:
             return []
         query_vec = ollama_client.embed_query(query_text)
+        # Filter server-side to the in-scope source paths when a selection is
+        # supplied; ``None`` preserves the unfiltered whole-archive behavior.
+        where = (
+            {"source_path": {"$in": sorted(where_sources)}} if where_sources else None
+        )
         res = self._collection.query(
             query_embeddings=[query_vec],
             n_results=min(top_k, self.count()),
+            where=where,
             include=["documents", "metadatas", "distances"],
         )
         out: list[dict] = []

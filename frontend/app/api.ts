@@ -53,11 +53,31 @@ export async function getStats(): Promise<Stats> {
   return r.json();
 }
 
-export async function search(query: string): Promise<{ results: SearchHit[] }> {
+// Optional query scope. Selecting sources sends `sources`; choosing a group
+// (without an ad-hoc selection) sends `group_id`. When neither is set, the
+// client sends neither key so the query runs against the whole archive.
+export interface QueryScopeArg {
+  sources?: string[];
+  group_id?: string;
+}
+
+// Merges a scope into a request body, only including keys that are meaningfully
+// set so an unset scope sends neither (whole archive per Req 15.4).
+function scopeBody(scope?: QueryScopeArg): Record<string, unknown> {
+  return {
+    ...(scope?.sources?.length ? { sources: scope.sources } : {}),
+    ...(scope?.group_id ? { group_id: scope.group_id } : {}),
+  };
+}
+
+export async function search(
+  query: string,
+  scope?: QueryScopeArg
+): Promise<{ results: SearchHit[] }> {
   const r = await fetch("/api/search", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ query }),
+    body: JSON.stringify({ query, ...scopeBody(scope) }),
   });
   if (!r.ok) throw new Error("search failed");
   return r.json();
@@ -147,12 +167,13 @@ export async function ask(
     onCitations: (c: Citation[]) => void;
     onSection: (s: AnswerSection) => void;
     onToken: (section: AnswerSection, t: string) => void;
-  }
+  },
+  scope?: QueryScopeArg
 ): Promise<void> {
   const r = await fetch("/api/ask", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ question }),
+    body: JSON.stringify({ question, ...scopeBody(scope) }),
   });
   if (!r.ok || !r.body) throw new Error("ask failed");
 
@@ -180,4 +201,95 @@ export async function ask(
       }
     }
   }
+}
+
+// ---------------------------------------------------------------------------
+// Source selection and groups
+// ---------------------------------------------------------------------------
+
+// A named group of sources. `members` are source_path values; `present` (when
+// returned) flags whether each member is currently in the Vector_Store.
+export interface Group {
+  group_id: string;
+  name: string;
+  members: string[];
+  present?: Record<string, boolean>;
+}
+
+// A source that can be selected for scoping, with its chunk count.
+export interface SelectableSource {
+  source_path: string;
+  chunks: number;
+}
+
+export async function getSelectableSources(): Promise<{ sources: SelectableSource[] }> {
+  const r = await fetch("/api/selectable-sources");
+  if (!r.ok) throw new Error("failed to load selectable sources");
+  return r.json();
+}
+
+export async function listGroups(): Promise<{ groups: Group[] }> {
+  const r = await fetch("/api/groups");
+  if (!r.ok) throw new Error("failed to list groups");
+  return r.json();
+}
+
+export async function createGroup(name: string): Promise<Group> {
+  const r = await fetch("/api/groups", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name }),
+  });
+  if (!r.ok) {
+    const detail = await r.json().catch(() => ({}));
+    throw new Error(detail.detail || "failed to create group");
+  }
+  return r.json();
+}
+
+export async function renameGroup(id: string, name: string): Promise<Group> {
+  const r = await fetch(`/api/groups/${id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name }),
+  });
+  if (!r.ok) {
+    const detail = await r.json().catch(() => ({}));
+    throw new Error(detail.detail || "failed to rename group");
+  }
+  return r.json();
+}
+
+export async function deleteGroup(id: string): Promise<void> {
+  const r = await fetch(`/api/groups/${id}`, { method: "DELETE" });
+  if (!r.ok) {
+    const detail = await r.json().catch(() => ({}));
+    throw new Error(detail.detail || "failed to delete group");
+  }
+}
+
+export async function addSources(id: string, sources: string[]): Promise<Group> {
+  const r = await fetch(`/api/groups/${id}/sources`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ sources }),
+  });
+  if (!r.ok) {
+    const detail = await r.json().catch(() => ({}));
+    throw new Error(detail.detail || "failed to add sources");
+  }
+  return r.json();
+}
+
+export async function removeSources(id: string, sources: string[]): Promise<Group> {
+  const r = await fetch(`/api/groups/${id}/sources`, {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ sources }),
+  });
+  if (!r.ok) {
+    const detail = await r.json().catch(() => ({}));
+    throw new Error(detail.detail || "failed to remove sources");
+  }
+  return r.json();
 }

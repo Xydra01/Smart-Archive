@@ -7,11 +7,13 @@ to be on the same scale — robust and parameter-light.
 
     rrf_score(d) = sum over lists L of 1 / (k + rank_L(d))
 """
+
 from __future__ import annotations
 
 from ..config import settings
 from ..indexing.keyword_index import get_keyword_index
 from ..indexing.vector_store import get_store
+from .scope import QueryScope
 
 
 def _rrf(rankings: list[list[dict]], k: int) -> dict[str, float]:
@@ -24,12 +26,35 @@ def _rrf(rankings: list[list[dict]], k: int) -> dict[str, float]:
     return scores
 
 
-def hybrid_search(query: str, top_k: int | None = None) -> list[dict]:
-    """Return the top fused chunks for a query, richest metadata preserved."""
-    top_k = top_k or settings.fusion_top_k
+def hybrid_search(
+    query: str, top_k: int | None = None, scope: QueryScope | None = None
+) -> list[dict]:
+    """Return the top fused chunks for a query, richest metadata preserved.
 
-    semantic = get_store().query(query, settings.semantic_top_k)
-    keyword = get_keyword_index().query(query, settings.keyword_top_k)
+    ``scope`` restricts retrieval to a subset of sources. It defaults to the
+    whole archive, so callers that pass no scope get the original behavior.
+    When a scope is set, retrieval is limited to Effective_Sources — the
+    selection intersected with the sources currently present in the store. An
+    empty intersection short-circuits to zero results without querying either
+    retriever (an empty scope means "search nothing," never "search all").
+    """
+    top_k = top_k or settings.fusion_top_k
+    scope = scope or QueryScope.whole_archive()
+    store = get_store()
+
+    if scope.is_unscoped:
+        semantic = store.query(query, settings.semantic_top_k)
+        keyword = get_keyword_index().query(query, settings.keyword_top_k)
+    else:
+        # Effective_Sources: selection ∩ sources currently in the store.
+        effective = scope.selection & frozenset(store.sources().keys())
+        if not effective:
+            return []
+        allowed = set(effective)
+        semantic = store.query(query, settings.semantic_top_k, where_sources=allowed)
+        keyword = get_keyword_index().query(
+            query, settings.keyword_top_k, allowed_sources=allowed
+        )
 
     # Index items by id so we can attach per-retriever provenance.
     by_id: dict[str, dict] = {}

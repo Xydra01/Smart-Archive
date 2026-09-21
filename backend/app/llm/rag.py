@@ -100,20 +100,31 @@ def _persource_prompt(question: str, context: str) -> str:
     )
 
 
-def _empty_response() -> dict:
+def _empty_message(scope=None) -> str:
+    """Scope-aware message for the empty-hits case.
+
+    When a non-unscoped selection is active but nothing is in scope, say so;
+    otherwise fall back to the whole-archive "nothing relevant" wording.
+    """
+    if scope is not None and not scope.is_unscoped:
+        return "No sources are in scope for this query."
+    return "I couldn't find anything relevant in the archive for that query."
+
+
+def _empty_response(scope=None) -> dict:
     return {
-        "summary": "I couldn't find anything relevant in the archive for that query.",
+        "summary": _empty_message(scope),
         "per_source": "",
         "citations": [],
         "hits": [],
     }
 
 
-def answer(question: str, top_k: int | None = None) -> dict:
+def answer(question: str, top_k: int | None = None, scope=None) -> dict:
     """Non-streaming: retrieve and produce summary + per-source + citations."""
-    hits = hybrid_search(question, top_k=top_k)
+    hits = hybrid_search(question, top_k=top_k, scope=scope)
     if not hits:
-        return _empty_response()
+        return _empty_response(scope)
     context, citations = _format_context(hits)
     summary = ollama_client.generate(
         _summary_prompt(question, context), system=SUMMARY_SYSTEM
@@ -129,7 +140,7 @@ def answer(question: str, top_k: int | None = None) -> dict:
     }
 
 
-def answer_stream(question: str, top_k: int | None = None):
+def answer_stream(question: str, top_k: int | None = None, scope=None):
     """Streaming variant.
 
     Emits, in order:
@@ -139,14 +150,11 @@ def answer_stream(question: str, top_k: int | None = None):
       ('section', 'per_source')      marker
       ('token', str) ...             per-source tokens
     """
-    hits = hybrid_search(question, top_k=top_k)
+    hits = hybrid_search(question, top_k=top_k, scope=scope)
     if not hits:
         yield ("citations", [])
         yield ("section", "summary")
-        yield (
-            "token",
-            "I couldn't find anything relevant in the archive for that query.",
-        )
+        yield ("token", _empty_message(scope))
         return
 
     context, citations = _format_context(hits)

@@ -42,7 +42,12 @@ class KeywordIndex:
         self._persist()
         return len(documents)
 
-    def query(self, query_text: str, top_k: int) -> list[dict]:
+    def query(
+        self,
+        query_text: str,
+        top_k: int,
+        allowed_sources: set[str] | None = None,
+    ) -> list[dict]:
         if self._bm25 is None:
             self._load()
         if self._bm25 is None or not self._docs:
@@ -52,11 +57,20 @@ class KeywordIndex:
             return []
         scores = self._bm25.get_scores(tokens)
         ranked = sorted(range(len(scores)), key=lambda i: scores[i], reverse=True)
+        # Apply the source-scope filter to the full ranked list BEFORE truncating
+        # to top_k, so in-scope hits are not lost when out-of-scope docs would
+        # otherwise dominate the top_k window. When allowed_sources is None,
+        # behavior is unchanged.
         results: list[dict] = []
-        for i in ranked[:top_k]:
+        for i in ranked:
             if scores[i] <= 0:
                 continue
             d = self._docs[i]
+            if (
+                allowed_sources is not None
+                and d["metadata"].get("source_path") not in allowed_sources
+            ):
+                continue
             results.append(
                 {
                     "id": d["id"],
@@ -65,6 +79,8 @@ class KeywordIndex:
                     "score": float(scores[i]),
                 }
             )
+            if len(results) >= top_k:
+                break
         return results
 
     def _persist(self) -> None:

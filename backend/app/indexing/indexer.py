@@ -10,6 +10,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from ..config import settings
+from ..groups.store import get_group_store
 from ..ingestion.chunker import chunk_sections
 from ..ingestion.loaders import load_document, SUPPORTED_EXTENSIONS, UnsupportedFileType
 from .jobs import Job
@@ -234,6 +235,7 @@ def remove_source(source_path: str) -> dict:
     store = get_store()
     store.delete_by_source(source_path)
     get_manifest().remove(source_path)
+    get_group_store().prune_source(source_path)
     _rebuild_keyword_index()
     return {"removed": source_path, "total_chunks": store.count()}
 
@@ -245,6 +247,7 @@ def reset_index() -> dict:
     manifest = get_manifest()
     for rel in list(manifest.entries().keys()):
         manifest.remove(rel)
+    get_group_store().clear_all_members()
     _rebuild_keyword_index()
     return {"reset": True, "total_chunks": store.count()}
 

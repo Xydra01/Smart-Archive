@@ -24,6 +24,8 @@ class Settings(BaseSettings):
     raw_dir: Path = ARCHIVE_ROOT / "data" / "raw"
     chroma_dir: Path = ARCHIVE_ROOT / "data" / "chroma"
     keyword_dir: Path = ARCHIVE_ROOT / "data" / "keyword"
+    # Persisted source groups, kept beside the index manifest (separate file).
+    groups_file: Path = ARCHIVE_ROOT / "data" / "groups.json"
 
     # --- Ollama / models ---
     ollama_host: str = "http://localhost:11434"
@@ -49,6 +51,7 @@ class Settings(BaseSettings):
     keyword_top_k: int = 20
     fusion_top_k: int = 8  # chunks handed to the LLM after fusion
     rrf_k: int = 60  # reciprocal-rank-fusion constant
+    max_selection: int = 10_000  # cap on sources in a single scoped query
 
     # --- Generation (kept modest for 8GB RAM) ---
     llm_num_ctx: int = 4096

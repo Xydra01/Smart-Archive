@@ -1,22 +1,33 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
+  addSources,
   ask,
   Citation,
+  createGroup,
+  deleteGroup,
   getHealth,
+  getSelectableSources,
   getStats,
+  Group,
   Health,
   importFolder,
   indexAll,
   IndexStatus,
+  listGroups,
+  QueryScopeArg,
+  removeSources,
+  renameGroup,
   search,
   SearchHit,
+  SelectableSource,
   Stats,
   uploadFiles,
 } from "./api";
 
 type Mode = "ask" | "search";
+type ScopeMode = "archive" | "sources" | "group";
 
 export default function Home() {
   const [mode, setMode] = useState<Mode>("ask");
@@ -36,10 +47,35 @@ export default function Home() {
   const [folderPath, setFolderPath] = useState("");
   const fileInput = useRef<HTMLInputElement>(null);
 
+  // Scope + groups state
+  const [selectable, setSelectable] = useState<SelectableSource[]>([]);
+  const [groups, setGroups] = useState<Group[]>([]);
+  const [scopeMode, setScopeMode] = useState<ScopeMode>("archive");
+  const [selectedSources, setSelectedSources] = useState<string[]>([]);
+  const [selectedGroupId, setSelectedGroupId] = useState<string>("");
+
+  // Groups manager UI state
+  const [managerOpen, setManagerOpen] = useState(false);
+  const [newGroupName, setNewGroupName] = useState("");
+  const [editGroupId, setEditGroupId] = useState<string>("");
+
   async function refreshStatus() {
     try {
       setStats(await getStats());
       setHealth(await getHealth());
+    } catch {
+      /* backend may not be up yet */
+    }
+    // Scope data is refreshed alongside status so the source list and group
+    // memberships stay current after any index run or group mutation.
+    refreshScope();
+  }
+
+  async function refreshScope() {
+    try {
+      const [s, g] = await Promise.all([getSelectableSources(), listGroups()]);
+      setSelectable(s.sources);
+      setGroups(g.groups);
     } catch {
       /* backend may not be up yet */
     }
@@ -49,6 +85,50 @@ export default function Home() {
     refreshStatus();
   }, []);
 
+  // Drop any selected sources that no longer exist in the archive so the scope
+  // never points at stale paths after a re-index or removal.
+  useEffect(() => {
+    const present = new Set(selectable.map((s) => s.source_path));
+    setSelectedSources((prev) => prev.filter((p) => present.has(p)));
+  }, [selectable]);
+
+  // Clear the group selection if the chosen group was deleted.
+  useEffect(() => {
+    if (selectedGroupId && !groups.some((g) => g.group_id === selectedGroupId)) {
+      setSelectedGroupId("");
+    }
+  }, [groups, selectedGroupId]);
+
+  // Resolves the scope for a query. Ad-hoc selected sources take precedence
+  // over a chosen group (matches backend resolution). Whole-archive sends
+  // nothing so the client omits both keys.
+  function resolveScope(): QueryScopeArg | undefined {
+    if (scopeMode === "sources" && selectedSources.length > 0) {
+      return { sources: selectedSources };
+    }
+    if (scopeMode === "group" && selectedGroupId) {
+      return { group_id: selectedGroupId };
+    }
+    return undefined;
+  }
+
+  const activeScopeLabel = useMemo(() => {
+    if (scopeMode === "sources" && selectedSources.length > 0) {
+      return `Selected sources (${selectedSources.length})`;
+    }
+    if (scopeMode === "group" && selectedGroupId) {
+      const g = groups.find((x) => x.group_id === selectedGroupId);
+      if (g) return `${g.name} (${g.members.length} sources)`;
+    }
+    return "Whole archive";
+  }, [scopeMode, selectedSources, selectedGroupId, groups]);
+
+  function toggleSource(path: string) {
+    setSelectedSources((prev) =>
+      prev.includes(path) ? prev.filter((p) => p !== path) : [...prev, path]
+    );
+  }
+
   async function run() {
     if (!query.trim() || busy) return;
     setBusy(true);
@@ -57,20 +137,26 @@ export default function Home() {
     setCitations([]);
     setResults([]);
 
+    const scope = resolveScope();
+
     try {
       if (mode === "ask") {
         setStreaming(true);
-        await ask(query, {
-          onCitations: (c) => setCitations(c),
-          onSection: () => {},
-          onToken: (section, t) => {
-            if (section === "summary") setSummary((prev) => prev + t);
-            else setPerSource((prev) => prev + t);
+        await ask(
+          query,
+          {
+            onCitations: (c) => setCitations(c),
+            onSection: () => {},
+            onToken: (section, t) => {
+              if (section === "summary") setSummary((prev) => prev + t);
+              else setPerSource((prev) => prev + t);
+            },
           },
-        });
+          scope
+        );
         setStreaming(false);
       } else {
-        const res = await search(query);
+        const res = await search(query, scope);
         setResults(res.results);
       }
     } catch (e: any) {
@@ -138,8 +224,61 @@ export default function Home() {
     }
   }
 
-  const modelsReady =
-    health?.models.llm_ready && health?.models.embed_ready;
+  // ------------------------------------------------------------------
+  // Group mutations — each refreshes the groups list afterwards.
+  // ------------------------------------------------------------------
+
+  async function onCreateGroup() {
+    const name = newGroupName.trim();
+    if (!name) return;
+    try {
+      await createGroup(name);
+      setNewGroupName("");
+      await refreshScope();
+    } catch (e: any) {
+      setNotice(`Create group failed: ${e.message ?? e}`);
+    }
+  }
+
+  async function onRenameGroup(id: string, currentName: string) {
+    const name = window.prompt("Rename group", currentName);
+    if (name === null) return;
+    if (!name.trim()) return;
+    try {
+      await renameGroup(id, name.trim());
+      await refreshScope();
+    } catch (e: any) {
+      setNotice(`Rename failed: ${e.message ?? e}`);
+    }
+  }
+
+  async function onDeleteGroup(id: string) {
+    if (!window.confirm("Delete this group? Sources stay in the archive.")) return;
+    try {
+      await deleteGroup(id);
+      if (editGroupId === id) setEditGroupId("");
+      await refreshScope();
+    } catch (e: any) {
+      setNotice(`Delete failed: ${e.message ?? e}`);
+    }
+  }
+
+  async function onToggleMember(groupId: string, sourcePath: string, isMember: boolean) {
+    try {
+      if (isMember) await removeSources(groupId, [sourcePath]);
+      else await addSources(groupId, [sourcePath]);
+      await refreshScope();
+    } catch (e: any) {
+      setNotice(`Update group failed: ${e.message ?? e}`);
+    }
+  }
+
+  const editingGroup = useMemo(
+    () => groups.find((g) => g.group_id === editGroupId) ?? null,
+    [groups, editGroupId]
+  );
+
+  const modelsReady = health?.models.llm_ready && health?.models.embed_ready;
 
   return (
     <div className="container">
@@ -150,7 +289,7 @@ export default function Home() {
           </div>
           <div className="subtitle">
             Hybrid semantic + keyword search over your local archive, curated by
-            Bonsai 27B
+            a local LLM
           </div>
         </div>
         <div className="stats">
@@ -204,6 +343,92 @@ export default function Home() {
         <button className="btn" onClick={run} disabled={busy}>
           {busy ? <span className="spinner" /> : mode === "ask" ? "Ask" : "Search"}
         </button>
+      </div>
+
+      {/* Scope control */}
+      <div className="scope-panel">
+        <div className="scope-modes">
+          <div
+            className={`chip ${scopeMode === "archive" ? "active" : ""}`}
+            onClick={() => setScopeMode("archive")}
+          >
+            Whole archive
+          </div>
+          <div
+            className={`chip ${scopeMode === "sources" ? "active" : ""}`}
+            onClick={() => setScopeMode("sources")}
+          >
+            Selected sources
+          </div>
+          <div
+            className={`chip ${scopeMode === "group" ? "active" : ""}`}
+            onClick={() => setScopeMode("group")}
+          >
+            Group
+          </div>
+        </div>
+
+        {scopeMode === "sources" && (
+          <>
+            <div className="row" style={{ marginBottom: 8 }}>
+              <span className="muted">
+                {selectedSources.length} of {selectable.length} selected
+              </span>
+              {selectedSources.length > 0 && (
+                <button
+                  className="link-btn"
+                  onClick={() => setSelectedSources([])}
+                >
+                  Clear
+                </button>
+              )}
+            </div>
+            {selectable.length === 0 ? (
+              <div className="muted">No indexed sources yet.</div>
+            ) : (
+              <div className="source-list">
+                {selectable.map((s) => (
+                  <label className="source-row" key={s.source_path}>
+                    <input
+                      type="checkbox"
+                      checked={selectedSources.includes(s.source_path)}
+                      onChange={() => toggleSource(s.source_path)}
+                    />
+                    <span className="source-name">{s.source_path}</span>
+                    <span className="source-count">{s.chunks} chunks</span>
+                  </label>
+                ))}
+              </div>
+            )}
+          </>
+        )}
+
+        {scopeMode === "group" && (
+          <div className="row">
+            {groups.length === 0 ? (
+              <span className="muted">
+                No groups yet — create one in the manager below.
+              </span>
+            ) : (
+              <select
+                className="select"
+                value={selectedGroupId}
+                onChange={(e) => setSelectedGroupId(e.target.value)}
+              >
+                <option value="">Choose a group…</option>
+                {groups.map((g) => (
+                  <option key={g.group_id} value={g.group_id}>
+                    {g.name} ({g.members.length})
+                  </option>
+                ))}
+              </select>
+            )}
+          </div>
+        )}
+
+        <div className="scope-active">
+          Scope: <b>{activeScopeLabel}</b>
+        </div>
       </div>
 
       {notice && <div className="muted" style={{ marginBottom: 16 }}>{notice}</div>}
@@ -274,6 +499,133 @@ export default function Home() {
           ))}
         </div>
       )}
+
+      {/* Groups manager */}
+      <div className="panel">
+        <div
+          className="collapse-toggle section-label"
+          onClick={() => setManagerOpen((o) => !o)}
+        >
+          <span>Groups ({groups.length})</span>
+          <span className="caret">{managerOpen ? "▲ hide" : "▼ manage"}</span>
+        </div>
+
+        {managerOpen && (
+          <>
+            <div className="row" style={{ marginBottom: 16 }}>
+              <input
+                className="input"
+                placeholder="New group name…"
+                value={newGroupName}
+                onChange={(e) => setNewGroupName(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && onCreateGroup()}
+              />
+              <button
+                className="btn secondary"
+                onClick={onCreateGroup}
+                disabled={!newGroupName.trim()}
+              >
+                Create
+              </button>
+            </div>
+
+            {groups.length === 0 ? (
+              <div className="muted">No groups yet.</div>
+            ) : (
+              groups.map((g) => (
+                <div className="group-row" key={g.group_id}>
+                  <span className="group-name">{g.name}</span>
+                  <span className="group-count">{g.members.length} sources</span>
+                  <div className="group-actions">
+                    <button
+                      className="link-btn"
+                      onClick={() =>
+                        setEditGroupId((id) =>
+                          id === g.group_id ? "" : g.group_id
+                        )
+                      }
+                    >
+                      {editGroupId === g.group_id ? "Done" : "Edit sources"}
+                    </button>
+                    <button
+                      className="link-btn"
+                      onClick={() => onRenameGroup(g.group_id, g.name)}
+                    >
+                      Rename
+                    </button>
+                    <button
+                      className="link-btn"
+                      style={{ color: "var(--danger)" }}
+                      onClick={() => onDeleteGroup(g.group_id)}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+
+            {editingGroup && (
+              <div style={{ marginTop: 16 }}>
+                <div className="section-label">
+                  Members of “{editingGroup.name}”
+                </div>
+                {selectable.length === 0 &&
+                editingGroup.members.length === 0 ? (
+                  <div className="muted">No indexed sources yet.</div>
+                ) : (
+                  <div className="source-list">
+                    {/* Currently-selectable (indexed) sources */}
+                    {selectable.map((s) => {
+                      const isMember = editingGroup.members.includes(
+                        s.source_path
+                      );
+                      return (
+                        <label className="source-row" key={s.source_path}>
+                          <input
+                            type="checkbox"
+                            checked={isMember}
+                            onChange={() =>
+                              onToggleMember(
+                                editingGroup.group_id,
+                                s.source_path,
+                                isMember
+                              )
+                            }
+                          />
+                          <span className="source-name">{s.source_path}</span>
+                          <span className="source-count">
+                            {s.chunks} chunks
+                          </span>
+                        </label>
+                      );
+                    })}
+                    {/* Stale members: in the group but not currently indexed */}
+                    {editingGroup.members
+                      .filter(
+                        (m) =>
+                          !selectable.some((s) => s.source_path === m)
+                      )
+                      .map((m) => (
+                        <label className="source-row dim" key={m}>
+                          <input
+                            type="checkbox"
+                            checked
+                            onChange={() =>
+                              onToggleMember(editingGroup.group_id, m, true)
+                            }
+                          />
+                          <span className="source-name">{m}</span>
+                          <span className="source-count">not indexed</span>
+                        </label>
+                      ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </>
+        )}
+      </div>
 
       {/* Upload / index */}
       <div className="panel">

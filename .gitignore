@@ -17,6 +17,9 @@ data/keyword/*
 # Persistent index manifest (derived state; rebuilt on demand)
 data/index_manifest.json
 data/index_manifest.json.tmp
+# Persistent source groups (derived per-user state)
+data/groups.json
+data/groups.json.tmp
 # Any local model weights or GGUF files that get downloaded locally
 *.gguf
 *.bin
@@ -54,6 +57,7 @@ build/
 .mypy_cache/
 .ruff_cache/
 .ipynb_checkpoints/
+.hypothesis/
 
 # =========================================================================
 #  Node / Next.js (frontend)
@@ -64,6 +68,7 @@ frontend/.next/
 frontend/out/
 frontend/build/
 frontend/.turbo/
+*.tsbuildinfo
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*

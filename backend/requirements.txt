@@ -22,6 +22,10 @@ lxml==5.3.0
 # --- Text processing ---
 tiktoken==0.8.0
 
+# --- Testing ---
+pytest==9.1.1
+hypothesis==6.168.0
+
 # Note: httpx is a transitive dependency of both chromadb and ollama.
 # We intentionally do NOT pin it so pip can resolve a version compatible
 # with both (ollama requires httpx<0.28,>=0.27).

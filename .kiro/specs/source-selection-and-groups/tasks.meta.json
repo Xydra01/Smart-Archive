@@ -1,0 +1,761 @@
+{
+  "pbtResults": {
+    "6.2 Write property test for soundness (no out-of-scope leak)": {
+      "status": "passed",
+      "lastRunTimestamp": 1789956345041
+    },
+    "6.3 Write property test for both retrievers filtered before fusion": {
+      "status": "passed",
+      "lastRunTimestamp": 1789956346280
+    },
+    "6.4 Write property test for empty-scope zero results": {
+      "status": "passed",
+      "lastRunTimestamp": 1789956347390
+    },
+    "6.5 Write property test for stale members being inert": {
+      "status": "passed",
+      "lastRunTimestamp": 1789956348380
+    },
+    "6.6 Write property test for duplicate-insensitive selection": {
+      "status": "passed",
+      "lastRunTimestamp": 1789956349261
+    }
+  },
+  "executionHistory": {
+    "1.1 Add scope/group settings to `backend/app/config.py`": [
+      {
+        "executionId": "aa7a5113-c027-4413-ac00-0e0bc193dc13",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789954535796
+      },
+      {
+        "executionId": "aa7a5113-c027-4413-ac00-0e0bc193dc13",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789954545529
+      },
+      {
+        "executionId": "aa7a5113-c027-4413-ac00-0e0bc193dc13",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789954830546
+      }
+    ],
+    "2.1 Create `backend/app/search/scope.py` with the `QueryScope` dataclass": [
+      {
+        "executionId": "aa7a5113-c027-4413-ac00-0e0bc193dc13",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789954535827
+      },
+      {
+        "executionId": "aa7a5113-c027-4413-ac00-0e0bc193dc13",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789954547005
+      },
+      {
+        "executionId": "aa7a5113-c027-4413-ac00-0e0bc193dc13",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789954831744
+      }
+    ],
+    "3.1 Create `backend/app/groups/__init__.py` and the `Group` dataclass in `backend/app/groups/store.py`": [
+      {
+        "executionId": "aa7a5113-c027-4413-ac00-0e0bc193dc13",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789954535900
+      },
+      {
+        "executionId": "aa7a5113-c027-4413-ac00-0e0bc193dc13",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789954547979
+      },
+      {
+        "executionId": "aa7a5113-c027-4413-ac00-0e0bc193dc13",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789954832766
+      }
+    ],
+    "3.2 Implement `GroupStore` mirroring `Manifest` (lazy singleton `get_group_store()`, `threading.Lock`, atomic `_save`, corrupt-tolerant `_load`)": [
+      {
+        "executionId": "aa7a5113-c027-4413-ac00-0e0bc193dc13",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789954535924
+      },
+      {
+        "executionId": "aa7a5113-c027-4413-ac00-0e0bc193dc13",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789954847093
+      },
+      {
+        "executionId": "aa7a5113-c027-4413-ac00-0e0bc193dc13",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789955024638
+      }
+    ],
+    "4. Checkpoint — Ensure all pure-logic tests pass": [
+      {
+        "executionId": "aa7a5113-c027-4413-ac00-0e0bc193dc13",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789954535952
+      },
+      {
+        "executionId": "a7cfd265-56bb-4a83-acba-6db2093f0b6f",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789956146499
+      }
+    ],
+    "5.1 Add `where_sources` filter to `VectorStore.query` in `backend/app/indexing/vector_store.py`": [
+      {
+        "executionId": "aa7a5113-c027-4413-ac00-0e0bc193dc13",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789954535981
+      },
+      {
+        "executionId": "aa7a5113-c027-4413-ac00-0e0bc193dc13",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789954848560
+      },
+      {
+        "executionId": "aa7a5113-c027-4413-ac00-0e0bc193dc13",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789955025420
+      }
+    ],
+    "5.2 Add `allowed_sources` filter to `KeywordIndex.query` in `backend/app/indexing/keyword_index.py`": [
+      {
+        "executionId": "aa7a5113-c027-4413-ac00-0e0bc193dc13",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789954536012
+      },
+      {
+        "executionId": "aa7a5113-c027-4413-ac00-0e0bc193dc13",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789954849565
+      },
+      {
+        "executionId": "aa7a5113-c027-4413-ac00-0e0bc193dc13",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789955026639
+      }
+    ],
+    "6.1 Add optional `scope: QueryScope | None` to `hybrid_search` in `backend/app/search/hybrid.py`": [
+      {
+        "executionId": "aa7a5113-c027-4413-ac00-0e0bc193dc13",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789954536042
+      },
+      {
+        "executionId": "aa7a5113-c027-4413-ac00-0e0bc193dc13",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789955034047
+      },
+      {
+        "executionId": "aa7a5113-c027-4413-ac00-0e0bc193dc13",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789955108273
+      }
+    ],
+    "7.1 Add `scope` passthrough to `answer` and `answer_stream` in `backend/app/llm/rag.py`": [
+      {
+        "executionId": "aa7a5113-c027-4413-ac00-0e0bc193dc13",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789954536074
+      },
+      {
+        "executionId": "aa7a5113-c027-4413-ac00-0e0bc193dc13",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789955114283
+      },
+      {
+        "executionId": "aa7a5113-c027-4413-ac00-0e0bc193dc13",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789955169310
+      }
+    ],
+    "8. Checkpoint — Ensure retrieval and RAG scoping tests pass": [
+      {
+        "executionId": "aa7a5113-c027-4413-ac00-0e0bc193dc13",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789954536099
+      },
+      {
+        "executionId": "a7cfd265-56bb-4a83-acba-6db2093f0b6f",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789956410808
+      }
+    ],
+    "9.1 Add `resolve_scope(sources, group_id) -> QueryScope` helper in `backend/app/main.py`": [
+      {
+        "executionId": "aa7a5113-c027-4413-ac00-0e0bc193dc13",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789954536125
+      },
+      {
+        "executionId": "aa7a5113-c027-4413-ac00-0e0bc193dc13",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789955175479
+      },
+      {
+        "executionId": "aa7a5113-c027-4413-ac00-0e0bc193dc13",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789955297184
+      }
+    ],
+    "9.2 Add optional `sources` and `group_id` to `SearchRequest`/`AskRequest` and wire both handlers": [
+      {
+        "executionId": "aa7a5113-c027-4413-ac00-0e0bc193dc13",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789954536150
+      },
+      {
+        "executionId": "aa7a5113-c027-4413-ac00-0e0bc193dc13",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789955180565
+      },
+      {
+        "executionId": "aa7a5113-c027-4413-ac00-0e0bc193dc13",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789955298147
+      }
+    ],
+    "10.1 Add `GET /api/selectable-sources` in `backend/app/main.py`": [
+      {
+        "executionId": "aa7a5113-c027-4413-ac00-0e0bc193dc13",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789954536196
+      },
+      {
+        "executionId": "aa7a5113-c027-4413-ac00-0e0bc193dc13",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789955181909
+      },
+      {
+        "executionId": "aa7a5113-c027-4413-ac00-0e0bc193dc13",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789955299630
+      }
+    ],
+    "10.2 Add the `/api/groups` CRUD surface with a `GroupView` builder": [
+      {
+        "executionId": "aa7a5113-c027-4413-ac00-0e0bc193dc13",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789954536223
+      },
+      {
+        "executionId": "aa7a5113-c027-4413-ac00-0e0bc193dc13",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789955182877
+      },
+      {
+        "executionId": "aa7a5113-c027-4413-ac00-0e0bc193dc13",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789955300428
+      }
+    ],
+    "11.1 Hook pruning into `remove_source` and `reset_index` in `backend/app/indexing/indexer.py`": [
+      {
+        "executionId": "aa7a5113-c027-4413-ac00-0e0bc193dc13",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789954536262
+      },
+      {
+        "executionId": "aa7a5113-c027-4413-ac00-0e0bc193dc13",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789955035193
+      },
+      {
+        "executionId": "aa7a5113-c027-4413-ac00-0e0bc193dc13",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789955109252
+      }
+    ],
+    "12.1 Add types and client functions to `frontend/app/api.ts`": [
+      {
+        "executionId": "aa7a5113-c027-4413-ac00-0e0bc193dc13",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789954536297
+      },
+      {
+        "executionId": "aa7a5113-c027-4413-ac00-0e0bc193dc13",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789955304865
+      },
+      {
+        "executionId": "aa7a5113-c027-4413-ac00-0e0bc193dc13",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789955569912
+      }
+    ],
+    "13.1 Add the scope control and groups manager to `frontend/app/page.tsx`": [
+      {
+        "executionId": "aa7a5113-c027-4413-ac00-0e0bc193dc13",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789954536377
+      },
+      {
+        "executionId": "aa7a5113-c027-4413-ac00-0e0bc193dc13",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789955570885
+      },
+      {
+        "executionId": "aa7a5113-c027-4413-ac00-0e0bc193dc13",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789955721506
+      }
+    ],
+    "1. Add configuration and test tooling": [
+      {
+        "executionId": "aa7a5113-c027-4413-ac00-0e0bc193dc13",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789954830642
+      }
+    ],
+    "2. Implement the QueryScope value object": [
+      {
+        "executionId": "aa7a5113-c027-4413-ac00-0e0bc193dc13",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789954831780
+      }
+    ],
+    "3. Implement the Group data model and GroupStore": [
+      {
+        "executionId": "aa7a5113-c027-4413-ac00-0e0bc193dc13",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789955024728
+      }
+    ],
+    "5. Add source-scope filtering to both retrievers": [
+      {
+        "executionId": "aa7a5113-c027-4413-ac00-0e0bc193dc13",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789955026686
+      }
+    ],
+    "6. Add scope to hybrid_search": [
+      {
+        "executionId": "aa7a5113-c027-4413-ac00-0e0bc193dc13",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789955108317
+      }
+    ],
+    "11. Wire group-membership pruning into the indexer": [
+      {
+        "executionId": "aa7a5113-c027-4413-ac00-0e0bc193dc13",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789955109287
+      }
+    ],
+    "7. Thread scope through the RAG service": [
+      {
+        "executionId": "aa7a5113-c027-4413-ac00-0e0bc193dc13",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789955169339
+      }
+    ],
+    "9. Implement scope resolution and wire query endpoints": [
+      {
+        "executionId": "aa7a5113-c027-4413-ac00-0e0bc193dc13",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789955298190
+      }
+    ],
+    "10. Implement the selectable-sources and group endpoints": [
+      {
+        "executionId": "aa7a5113-c027-4413-ac00-0e0bc193dc13",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789955300460
+      }
+    ],
+    "12. Extend the frontend API client": [
+      {
+        "executionId": "aa7a5113-c027-4413-ac00-0e0bc193dc13",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789955570013
+      }
+    ],
+    "13. Add frontend scope and group-management controls": [
+      {
+        "executionId": "aa7a5113-c027-4413-ac00-0e0bc193dc13",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789955721573
+      }
+    ],
+    "1.2 Add Hypothesis and pytest to `backend/requirements.txt`": [
+      {
+        "executionId": "a7cfd265-56bb-4a83-acba-6db2093f0b6f",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789955797415
+      },
+      {
+        "executionId": "a7cfd265-56bb-4a83-acba-6db2093f0b6f",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789955951057
+      }
+    ],
+    "2.2 Write property test for QueryScope set/dedup semantics": [
+      {
+        "executionId": "a7cfd265-56bb-4a83-acba-6db2093f0b6f",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789955951954
+      },
+      {
+        "executionId": "a7cfd265-56bb-4a83-acba-6db2093f0b6f",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789956124012
+      }
+    ],
+    "3.3 Write property test for add-sources (union + idempotence)": [
+      {
+        "executionId": "a7cfd265-56bb-4a83-acba-6db2093f0b6f",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789955953064
+      },
+      {
+        "executionId": "a7cfd265-56bb-4a83-acba-6db2093f0b6f",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789956126350
+      }
+    ],
+    "3.4 Write property test for remove-sources (difference + idempotence)": [
+      {
+        "executionId": "a7cfd265-56bb-4a83-acba-6db2093f0b6f",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789955958978
+      },
+      {
+        "executionId": "a7cfd265-56bb-4a83-acba-6db2093f0b6f",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789956127747
+      }
+    ],
+    "3.5 Write property test for persistence round-trip": [
+      {
+        "executionId": "a7cfd265-56bb-4a83-acba-6db2093f0b6f",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789955959935
+      },
+      {
+        "executionId": "a7cfd265-56bb-4a83-acba-6db2093f0b6f",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789956128669
+      }
+    ],
+    "3.6 Write property test for corrupt/missing load": [
+      {
+        "executionId": "a7cfd265-56bb-4a83-acba-6db2093f0b6f",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789955960820
+      },
+      {
+        "executionId": "a7cfd265-56bb-4a83-acba-6db2093f0b6f",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789956129643
+      }
+    ],
+    "3.7 Write property test for source-removal pruning": [
+      {
+        "executionId": "a7cfd265-56bb-4a83-acba-6db2093f0b6f",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789955962275
+      },
+      {
+        "executionId": "a7cfd265-56bb-4a83-acba-6db2093f0b6f",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789956131070
+      }
+    ],
+    "3.8 Write property test for index-reset member clearing": [
+      {
+        "executionId": "a7cfd265-56bb-4a83-acba-6db2093f0b6f",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789955963287
+      },
+      {
+        "executionId": "a7cfd265-56bb-4a83-acba-6db2093f0b6f",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789956131945
+      }
+    ],
+    "3.9 Write model-based property test for GroupStore": [
+      {
+        "executionId": "a7cfd265-56bb-4a83-acba-6db2093f0b6f",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789955964121
+      },
+      {
+        "executionId": "a7cfd265-56bb-4a83-acba-6db2093f0b6f",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789956132970
+      }
+    ],
+    "3.10 Write unit test for atomic write mechanism": [
+      {
+        "executionId": "a7cfd265-56bb-4a83-acba-6db2093f0b6f",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789955965599
+      },
+      {
+        "executionId": "a7cfd265-56bb-4a83-acba-6db2093f0b6f",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789956134303
+      }
+    ],
+    "1.3 Write smoke test for the groups persistence path": [
+      {
+        "executionId": "a7cfd265-56bb-4a83-acba-6db2093f0b6f",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789955966523
+      },
+      {
+        "executionId": "a7cfd265-56bb-4a83-acba-6db2093f0b6f",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789956125479
+      }
+    ],
+    "5.3 Write integration test for the real Chroma `$in` filter": [
+      {
+        "executionId": "a7cfd265-56bb-4a83-acba-6db2093f0b6f",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789955967982
+      },
+      {
+        "executionId": "a7cfd265-56bb-4a83-acba-6db2093f0b6f",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789956135244
+      }
+    ],
+    "5.4 Write test for the BM25 pre-truncation filter": [
+      {
+        "executionId": "a7cfd265-56bb-4a83-acba-6db2093f0b6f",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789955968874
+      },
+      {
+        "executionId": "a7cfd265-56bb-4a83-acba-6db2093f0b6f",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789956136305
+      }
+    ],
+    "6.2 Write property test for soundness (no out-of-scope leak)": [
+      {
+        "executionId": "a7cfd265-56bb-4a83-acba-6db2093f0b6f",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789956147794
+      },
+      {
+        "executionId": "a7cfd265-56bb-4a83-acba-6db2093f0b6f",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789956395526
+      }
+    ],
+    "7.2 Write property test for scoped Ask citations": [
+      {
+        "executionId": "a7cfd265-56bb-4a83-acba-6db2093f0b6f",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789956148844
+      },
+      {
+        "executionId": "a7cfd265-56bb-4a83-acba-6db2093f0b6f",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789956400738
+      }
+    ],
+    "9.3 Write property test for group-vs-ad-hoc equivalence": [
+      {
+        "executionId": "a7cfd265-56bb-4a83-acba-6db2093f0b6f",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789956150278
+      },
+      {
+        "executionId": "a7cfd265-56bb-4a83-acba-6db2093f0b6f",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789956402172
+      }
+    ],
+    "6.3 Write property test for both retrievers filtered before fusion": [
+      {
+        "executionId": "a7cfd265-56bb-4a83-acba-6db2093f0b6f",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789956155760
+      },
+      {
+        "executionId": "a7cfd265-56bb-4a83-acba-6db2093f0b6f",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789956396465
+      }
+    ],
+    "6.4 Write property test for empty-scope zero results": [
+      {
+        "executionId": "a7cfd265-56bb-4a83-acba-6db2093f0b6f",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789956156258
+      },
+      {
+        "executionId": "a7cfd265-56bb-4a83-acba-6db2093f0b6f",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789956397416
+      }
+    ],
+    "6.5 Write property test for stale members being inert": [
+      {
+        "executionId": "a7cfd265-56bb-4a83-acba-6db2093f0b6f",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789956157543
+      },
+      {
+        "executionId": "a7cfd265-56bb-4a83-acba-6db2093f0b6f",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789956398904
+      }
+    ],
+    "6.6 Write property test for duplicate-insensitive selection": [
+      {
+        "executionId": "a7cfd265-56bb-4a83-acba-6db2093f0b6f",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789956158546
+      },
+      {
+        "executionId": "a7cfd265-56bb-4a83-acba-6db2093f0b6f",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789956399762
+      }
+    ],
+    "9.4 Write property test for ad-hoc precedence over group_id": [
+      {
+        "executionId": "a7cfd265-56bb-4a83-acba-6db2093f0b6f",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789956159954
+      },
+      {
+        "executionId": "a7cfd265-56bb-4a83-acba-6db2093f0b6f",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789956403167
+      }
+    ],
+    "9.5 Write unit tests for query-path error/boundary paths": [
+      {
+        "executionId": "a7cfd265-56bb-4a83-acba-6db2093f0b6f",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789956161265
+      },
+      {
+        "executionId": "a7cfd265-56bb-4a83-acba-6db2093f0b6f",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789956404481
+      }
+    ],
+    "10.3 Write property test for selectable sources": [
+      {
+        "executionId": "a7cfd265-56bb-4a83-acba-6db2093f0b6f",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789956162268
+      },
+      {
+        "executionId": "a7cfd265-56bb-4a83-acba-6db2093f0b6f",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789956405405
+      }
+    ],
+    "10.4 Write property test for presence flags": [
+      {
+        "executionId": "a7cfd265-56bb-4a83-acba-6db2093f0b6f",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789956163222
+      },
+      {
+        "executionId": "a7cfd265-56bb-4a83-acba-6db2093f0b6f",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789956406390
+      }
+    ],
+    "10.5 Write property test for group-name validation": [
+      {
+        "executionId": "a7cfd265-56bb-4a83-acba-6db2093f0b6f",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789956164172
+      },
+      {
+        "executionId": "a7cfd265-56bb-4a83-acba-6db2093f0b6f",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789956407405
+      }
+    ],
+    "10.6 Write unit tests for group-route 404s": [
+      {
+        "executionId": "a7cfd265-56bb-4a83-acba-6db2093f0b6f",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789956165154
+      },
+      {
+        "executionId": "a7cfd265-56bb-4a83-acba-6db2093f0b6f",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789956408705
+      }
+    ],
+    "11.2 Write integration test for indexer pruning hooks": [
+      {
+        "executionId": "a7cfd265-56bb-4a83-acba-6db2093f0b6f",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789956166220
+      },
+      {
+        "executionId": "a7cfd265-56bb-4a83-acba-6db2093f0b6f",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789956409686
+      }
+    ],
+    "13.2 Write frontend component tests for scope controls": [
+      {
+        "executionId": "a7cfd265-56bb-4a83-acba-6db2093f0b6f",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789956417099
+      },
+      {
+        "executionId": "a7cfd265-56bb-4a83-acba-6db2093f0b6f",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789956690218
+      }
+    ],
+    "14.1 Run the full backend test suite from `backend/.venv`": [
+      {
+        "executionId": "a7cfd265-56bb-4a83-acba-6db2093f0b6f",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789956690784
+      },
+      {
+        "executionId": "a7cfd265-56bb-4a83-acba-6db2093f0b6f",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789956727171
+      }
+    ],
+    "14.2 Run the Chroma `$in` + BM25 filter integration path": [
+      {
+        "executionId": "a7cfd265-56bb-4a83-acba-6db2093f0b6f",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789956692558
+      },
+      {
+        "executionId": "a7cfd265-56bb-4a83-acba-6db2093f0b6f",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789956728211
+      }
+    ],
+    "14.3 Build the frontend": [
+      {
+        "executionId": "a7cfd265-56bb-4a83-acba-6db2093f0b6f",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789956693088
+      },
+      {
+        "executionId": "a7cfd265-56bb-4a83-acba-6db2093f0b6f",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789956729143
+      }
+    ],
+    "14. Final verification": [
+      {
+        "executionId": "a7cfd265-56bb-4a83-acba-6db2093f0b6f",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1789956727244
+      }
+    ]
+  }
+}
