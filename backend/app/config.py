@@ -61,10 +61,29 @@ class Settings(BaseSettings):
     vision_enabled: bool = False
     vision_model: str = "qwen2.5vl:3b"
     vision_timeout_s: float = 120.0  # per-visual wall-clock timeout
-    vision_max_images_per_page: int = 6  # image cap per page
+    vision_max_images_per_page: int = 4  # image cap per page (lower = faster)
     vision_max_images_per_file: int = 400  # image cap per file
-    vision_min_image_pixels: int = 4096  # skip tiny/decorative images (~64x64)
-    vision_render_dpi: int = 150  # DPI when rendering pages for figures
+    vision_min_image_pixels: int = 16384  # skip images below ~128x128 (decorative)
+    vision_render_dpi: int = 110  # DPI when rendering pages for figures
+    # Downscale large images before sending to the VLM. Full-resolution page
+    # scans (e.g. 2550x3265) are slow and can silently fail the model; the model
+    # reads figures fine at ~1024px. This is the biggest correctness+speed fix.
+    vision_max_image_dim: int = 1024  # longest side, in pixels
+    # Keep the vision model resident between calls so a long ingest doesn't pay
+    # repeated ~15-20s model reloads (Ollama unloads after ~5 min idle by
+    # default). Any Ollama duration string works, e.g. "30m", "1h", "-1" (never
+    # unload). This is the single biggest speedup for large vision ingests.
+    vision_keep_alive: str = "30m"
+    # Context must hold the encoded image plus the prompt and output. A single
+    # qwen2.5vl image can expand to ~4000+ tokens, and 4096 is not enough
+    # headroom (Ollama rejects with exceed_context_size). 8192 is a safe floor;
+    # capping output tokens is the real speed lever since extractions are short.
+    vision_num_ctx: int = 8192
+    vision_num_predict: int = 384
+    # Render scanned/image-only pages (no embedded images, little text) as a
+    # whole-page image for OCR. Turn off to skip that (fewer VLM calls) if your
+    # PDFs aren't scanned.
+    vision_ocr_scanned_pages: bool = True
 
     # --- Generation (kept modest for 8GB RAM) ---
     llm_num_ctx: int = 4096

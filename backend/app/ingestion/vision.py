@@ -204,7 +204,11 @@ def _discover_pdf_visuals(path: Path) -> list[_Visual]:
 
             # Scanned/image-only page heuristic: no usable embedded images and
             # little extractable text -> render the whole page as one visual.
-            if not embedded_found and len(visuals) < per_file_cap:
+            if (
+                settings.vision_ocr_scanned_pages
+                and not embedded_found
+                and len(visuals) < per_file_cap
+            ):
                 try:
                     text = page.get_text("text") or ""
                 except Exception:

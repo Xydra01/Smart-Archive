@@ -87,6 +87,36 @@ def vision_available() -> bool:
     return settings.vision_enabled and model_installed(settings.vision_model)
 
 
+def _downscale_image(image_bytes: bytes, max_dim: int) -> bytes:
+    """Shrink an image so its longest side is at most ``max_dim`` pixels.
+
+    Full-resolution page scans (multiple megapixels) are slow to process and can
+    make the VLM silently return nothing. Vision models read figures fine at
+    ~1024px, so we downscale before the call. Returns the original bytes
+    unchanged if it's already small enough or if anything goes wrong (best
+    effort — never block extraction on a resize failure).
+    """
+    if max_dim <= 0:
+        return image_bytes
+    try:
+        import io
+
+        from PIL import Image
+
+        im = Image.open(io.BytesIO(image_bytes))
+        longest = max(im.width, im.height)
+        if longest <= max_dim:
+            return image_bytes
+        scale = max_dim / float(longest)
+        new_size = (max(1, int(im.width * scale)), max(1, int(im.height * scale)))
+        im = im.convert("RGB").resize(new_size, Image.LANCZOS)
+        out = io.BytesIO()
+        im.save(out, format="PNG", optimize=True)
+        return out.getvalue()
+    except Exception:
+        return image_bytes
+
+
 def vision_extract(
     image_bytes: bytes, prompt: str, timeout_s: float | None = None
 ) -> str:
@@ -99,6 +129,7 @@ def vision_extract(
     import threading
 
     timeout_s = settings.vision_timeout_s if timeout_s is None else timeout_s
+    image_bytes = _downscale_image(image_bytes, settings.vision_max_image_dim)
     result: dict[str, object] = {}
 
     def _run() -> None:
@@ -107,9 +138,14 @@ def vision_extract(
                 model=settings.vision_model,
                 prompt=prompt,
                 images=[image_bytes],
+                # keep_alive holds the model in memory between images so a long
+                # ingest doesn't pay repeated reloads. Smaller ctx + capped
+                # output make each call faster; vision outputs are short.
+                keep_alive=settings.vision_keep_alive,
                 options={
                     "temperature": 0.1,
-                    "num_ctx": settings.llm_num_ctx,
+                    "num_ctx": settings.vision_num_ctx,
+                    "num_predict": settings.vision_num_predict,
                 },
             )
             result["text"] = resp.get("response", "")
