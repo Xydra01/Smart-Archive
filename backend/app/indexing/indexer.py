@@ -11,8 +11,10 @@ from pathlib import Path
 
 from ..config import settings
 from ..groups.store import get_group_store
+from ..ingestion import vision
 from ..ingestion.chunker import chunk_sections
 from ..ingestion.loaders import load_document, SUPPORTED_EXTENSIONS, UnsupportedFileType
+from ..llm import ollama_client
 from .jobs import Job
 from .keyword_index import get_keyword_index
 from .manifest import get_manifest
@@ -27,7 +29,14 @@ def _rel_path(path: Path) -> str:
     )
 
 
-def index_file(path: Path, *, progress=None, rebuild_keyword: bool = True) -> dict:
+def index_file(
+    path: Path,
+    *,
+    progress=None,
+    rebuild_keyword: bool = True,
+    job: Job | None = None,
+    vision_enabled: bool = False,
+) -> dict:
     """Ingest and index a single file. Returns a summary dict.
 
     ``progress`` is an optional callable(done, total, sections, chunks) used to
@@ -42,7 +51,24 @@ def index_file(path: Path, *, progress=None, rebuild_keyword: bool = True) -> di
             f"Supported: {', '.join(SUPPORTED_EXTENSIONS)}"
         )
 
+    if job is not None:
+        job.current_stage = "loading"
+        job.visuals_total = 0
+        job.visuals_done = 0
+
     sections = load_document(path)
+
+    # Vision extraction (opt-in). Availability is decided by the caller via the
+    # `vision` flag (checked once per job); here we just run it when asked. Any
+    # discovery failure degrades to no visuals, and per-visual failures are
+    # counted, so text/table indexing always proceeds.
+    visuals_indexed = 0
+    visuals_skipped = 0
+    if vision_enabled:
+        visual_sections, visuals_skipped = vision.extract_visuals(path, job=job)
+        visuals_indexed = len(visual_sections)
+        sections = sections + visual_sections
+
     chunks = chunk_sections(
         sections,
         source_path=path,
@@ -55,6 +81,9 @@ def index_file(path: Path, *, progress=None, rebuild_keyword: bool = True) -> di
     # Re-ingesting a file replaces its previous chunks (idempotent).
     rel = _rel_path(path)
     store.delete_by_source(rel)
+
+    if job is not None:
+        job.current_stage = "embedding"
 
     def _cb(done, total):
         if progress:
@@ -73,6 +102,8 @@ def index_file(path: Path, *, progress=None, rebuild_keyword: bool = True) -> di
         "source_path": rel,
         "sections": len(sections),
         "chunks_indexed": added,
+        "visuals_indexed": visuals_indexed,
+        "visuals_skipped": visuals_skipped,
     }
 
 
@@ -110,6 +141,19 @@ def run_index_job(job: Job, *, force: bool = False) -> None:
     files = _supported_files()
     job.total_files = len(files)
 
+    # Decide once per job whether vision extraction runs. If enabled but the VLM
+    # isn't installed, we note it and proceed with text/table indexing only
+    # (never abort the job).
+    vision_on = False
+    if settings.vision_enabled:
+        if ollama_client.vision_available():
+            vision_on = True
+        else:
+            job.message = (
+                f"Vision ingest is on but model '{settings.vision_model}' is not "
+                f"installed in Ollama — indexing text and tables only."
+            )
+
     # 1) Prune files that were indexed before but no longer exist on disk.
     existing_rels = {_rel_path(p) for p in files}
     for rel in manifest.prune_missing(existing_rels):
@@ -143,13 +187,23 @@ def run_index_job(job: Job, *, force: bool = False) -> None:
             job.file_chunk_total = total
 
         try:
-            result = index_file(path, progress=_progress, rebuild_keyword=False)
+            result = index_file(
+                path,
+                progress=_progress,
+                rebuild_keyword=False,
+                job=job,
+                vision_enabled=vision_on,
+            )
             job.results.append(result)
             job.total_chunks += result["chunks_indexed"]
             job.processed_files += 1
             did_index = True
         except Exception as e:
             job.results.append({"file": path.name, "error": str(e)})
+        finally:
+            job.current_stage = None
+            job.visuals_total = 0
+            job.visuals_done = 0
 
     # Rebuild the keyword index once, only if the corpus changed.
     if did_index or job.removed_files:

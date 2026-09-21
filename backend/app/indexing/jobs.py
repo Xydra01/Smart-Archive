@@ -29,9 +29,12 @@ class Job:
     skipped_files: int = 0  # unchanged files skipped via manifest
     removed_files: int = 0  # deleted files pruned from the index
     current_file: Optional[str] = None
+    current_stage: Optional[str] = None  # loading | extracting visuals | embedding
     total_chunks: int = 0  # chunks embedded so far (running total)
     file_chunk_done: int = 0  # progress within the current file
     file_chunk_total: int = 0
+    visuals_total: int = 0  # visuals detected in the current file
+    visuals_done: int = 0  # visuals processed so far in the current file
     message: str = ""
     error: Optional[str] = None
     started_at: float = field(default_factory=time.time)
@@ -64,6 +67,15 @@ class JobManager:
             if not self._jobs:
                 return None
             return max(self._jobs.values(), key=lambda j: j.started_at)
+
+    def is_indexing(self) -> bool:
+        """True iff the most recent job is currently running.
+
+        Query endpoints consult this to hard-block while indexing runs, so the
+        vision model and the chat model never contend for RAM on an 8GB box.
+        """
+        job = self.latest()
+        return job is not None and job.status == "running"
 
     def run_in_thread(self, job: Job, target) -> None:
         """Run ``target(job)`` in a daemon thread, updating status/errors."""

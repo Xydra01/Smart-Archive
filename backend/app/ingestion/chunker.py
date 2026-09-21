@@ -10,6 +10,7 @@ Every chunk gets:
 Chunking is measured in tokens (tiktoken cl100k_base) rather than characters so
 that long documents split predictably regardless of formatting or language.
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -18,6 +19,7 @@ from pathlib import Path
 
 import tiktoken
 
+from .content_types import CONTENT_TEXT
 from .loaders import LoadedSection
 
 # cl100k_base is a good general-purpose tokenizer; it only informs chunk sizing,
@@ -49,6 +51,8 @@ class Chunk:
             "chunk_index": self.chunk_index,
             "total_chunks": self.total_chunks,
             "token_count": self.token_count,
+            # Origin of this chunk's text: text | table | chart | figure | ocr.
+            "content_type": self.extra.get("content_type", CONTENT_TEXT),
         }
         # Merge scalar extras (page number, chapter, row range, heading…).
         for k, v in self.extra.items():

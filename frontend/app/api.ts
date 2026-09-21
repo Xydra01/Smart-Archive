@@ -7,8 +7,29 @@ export interface Citation {
   source_path: string | null;
   location: string;
   file_type: string | null;
+  content_type?: string; // text | table | chart | figure | ocr
   matched_by: string[];
   rrf_score: number | null;
+}
+
+// Thrown when a query is refused because an index job is running (HTTP 409 with
+// detail.code === "indexing_in_progress"). The UI shows a "paused" state for it.
+export class IndexingInProgressError extends Error {
+  constructor(message = "Indexing in progress — querying is paused.") {
+    super(message);
+    this.name = "IndexingInProgressError";
+  }
+}
+
+async function throwForQueryError(r: Response, fallback: string): Promise<never> {
+  if (r.status === 409) {
+    const body = await r.json().catch(() => ({}));
+    const detail = body?.detail;
+    if (detail && detail.code === "indexing_in_progress") {
+      throw new IndexingInProgressError(detail.message);
+    }
+  }
+  throw new Error(fallback);
 }
 
 export interface SearchHit {
@@ -79,7 +100,7 @@ export async function search(
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ query, ...scopeBody(scope) }),
   });
-  if (!r.ok) throw new Error("search failed");
+  if (!r.ok) await throwForQueryError(r, "search failed");
   return r.json();
 }
 
@@ -98,9 +119,12 @@ export interface IndexStatus {
   skipped_files?: number;
   removed_files?: number;
   current_file?: string | null;
+  current_stage?: string | null;
   total_chunks?: number;
   file_chunk_done?: number;
   file_chunk_total?: number;
+  visuals_total?: number;
+  visuals_done?: number;
   message?: string;
   error?: string | null;
   elapsed_s?: number;
@@ -175,7 +199,8 @@ export async function ask(
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ question, ...scopeBody(scope) }),
   });
-  if (!r.ok || !r.body) throw new Error("ask failed");
+  if (!r.ok) await throwForQueryError(r, "ask failed");
+  if (!r.body) throw new Error("ask failed");
 
   const reader = r.body.getReader();
   const decoder = new TextDecoder();

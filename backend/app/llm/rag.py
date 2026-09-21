@@ -72,6 +72,7 @@ def _format_context(hits: list[dict]) -> tuple[str, list[dict]]:
                 "source_path": md.get("source_path"),
                 "location": location,
                 "file_type": md.get("file_type"),
+                "content_type": md.get("content_type", "text"),
                 "matched_by": hit.get("matched_by", []),
                 "rrf_score": hit.get("rrf_score"),
             }

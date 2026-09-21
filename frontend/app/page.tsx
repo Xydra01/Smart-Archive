@@ -8,12 +8,14 @@ import {
   createGroup,
   deleteGroup,
   getHealth,
+  getIndexStatus,
   getSelectableSources,
   getStats,
   Group,
   Health,
   importFolder,
   indexAll,
+  IndexingInProgressError,
   IndexStatus,
   listGroups,
   QueryScopeArg,
@@ -85,6 +87,45 @@ export default function Home() {
     refreshStatus();
   }, []);
 
+  // Poll the index job status so querying is disabled whenever indexing runs —
+  // even if this client didn't start it (another tab, or an in-progress job on
+  // load). When a job finishes, controls re-enable automatically. While a job
+  // is active we refresh scope/stats once on the transition to idle.
+  useEffect(() => {
+    let active = true;
+    let wasRunning = false;
+    const tick = async () => {
+      try {
+        const s = await getIndexStatus();
+        if (!active) return;
+        const running = s.status === "running" || s.status === "pending";
+        setIndexing(running);
+        if (running) {
+          // Surface vision/embedding progress in the notice.
+          const stage = s.current_stage ? ` — ${s.current_stage}` : "";
+          const vis =
+            s.visuals_total && s.visuals_total > 0
+              ? ` (visuals ${s.visuals_done}/${s.visuals_total})`
+              : "";
+          const filePart = s.current_file ? ` ${s.current_file}` : "";
+          setNotice(`Indexing${filePart}${stage}${vis} — querying paused`);
+        } else if (wasRunning) {
+          setNotice(s.message || "Indexing complete.");
+          refreshStatus();
+        }
+        wasRunning = running;
+      } catch {
+        /* backend may be down; leave state as-is */
+      }
+    };
+    const id = setInterval(tick, 1500);
+    tick();
+    return () => {
+      active = false;
+      clearInterval(id);
+    };
+  }, []);
+
   // Drop any selected sources that no longer exist in the archive so the scope
   // never points at stale paths after a re-index or removal.
   useEffect(() => {
@@ -131,6 +172,10 @@ export default function Home() {
 
   async function run() {
     if (!query.trim() || busy) return;
+    if (indexing) {
+      setNotice("Querying is paused while indexing is in progress.");
+      return;
+    }
     setBusy(true);
     setSummary("");
     setPerSource("");
@@ -160,7 +205,12 @@ export default function Home() {
         setResults(res.results);
       }
     } catch (e: any) {
-      setNotice(`Error: ${e.message ?? e}`);
+      if (e instanceof IndexingInProgressError) {
+        setIndexing(true);
+        setNotice("Querying is paused while indexing is in progress.");
+      } else {
+        setNotice(`Error: ${e.message ?? e}`);
+      }
     } finally {
       setBusy(false);
       setStreaming(false);
@@ -332,18 +382,30 @@ export default function Home() {
         <input
           className="input"
           placeholder={
-            mode === "ask"
+            indexing
+              ? "Querying paused while indexing…"
+              : mode === "ask"
               ? "Ask anything about your archive…"
               : "Search for terms, names, topics…"
           }
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && run()}
+          disabled={indexing}
         />
-        <button className="btn" onClick={run} disabled={busy}>
+        <button className="btn" onClick={run} disabled={busy || indexing}>
           {busy ? <span className="spinner" /> : mode === "ask" ? "Ask" : "Search"}
         </button>
       </div>
+
+      {indexing && (
+        <div className="panel" style={{ borderColor: "var(--accent)" }}>
+          <div className="muted">
+            Indexing in progress — querying is paused and will resume
+            automatically when it finishes.
+          </div>
+        </div>
+      )}
 
       {/* Scope control */}
       <div className="scope-panel">
@@ -465,6 +527,9 @@ export default function Home() {
               <span>
                 <b>{c.source_file}</b>
                 {c.location ? ` — ${c.location}` : ""}{" "}
+                {c.content_type && c.content_type !== "text" && (
+                  <span className="tag">{c.content_type}</span>
+                )}{" "}
                 <span className="muted">
                   {c.matched_by.join(" + ")}
                 </span>
@@ -486,6 +551,10 @@ export default function Home() {
                 </b>
                 <span>{r.metadata.location}</span>
                 <span className="tag">{r.metadata.file_type}</span>
+                {r.metadata.content_type &&
+                  r.metadata.content_type !== "text" && (
+                    <span className="tag">{r.metadata.content_type}</span>
+                  )}
                 {r.matched_by.map((m) => (
                   <span key={m} className={`tag ${m}`}>
                     {m}

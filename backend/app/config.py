@@ -53,6 +53,19 @@ class Settings(BaseSettings):
     rrf_k: int = 60  # reciprocal-rank-fusion constant
     max_selection: int = 10_000  # cap on sources in a single scoped query
 
+    # --- Vision ingest (opt-in; slow, so default off) ---
+    # When on, a local vision-language model extracts searchable text from
+    # charts, diagrams, figures, and image-only tables during indexing. This is
+    # front-loaded work: slow at ingest, free at query time, and skipped for
+    # unchanged files by the manifest.
+    vision_enabled: bool = False
+    vision_model: str = "qwen2.5vl:3b"
+    vision_timeout_s: float = 120.0  # per-visual wall-clock timeout
+    vision_max_images_per_page: int = 6  # image cap per page
+    vision_max_images_per_file: int = 400  # image cap per file
+    vision_min_image_pixels: int = 4096  # skip tiny/decorative images (~64x64)
+    vision_render_dpi: int = 150  # DPI when rendering pages for figures
+
     # --- Generation (kept modest for 8GB RAM) ---
     llm_num_ctx: int = 4096
     llm_temperature: float = 0.2

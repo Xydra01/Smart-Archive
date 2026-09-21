@@ -234,10 +234,29 @@ def resolve_scope(sources: list[str] | None, group_id: str | None) -> QueryScope
 # --------------------------------------------------------------------------
 # Search & ask
 # --------------------------------------------------------------------------
+def require_no_active_index_job() -> None:
+    """Hard-block queries while an index job is running.
+
+    On an 8GB machine the vision model (ingest) and the chat model (query)
+    cannot both be resident, so we refuse queries during indexing rather than
+    thrash memory. The structured ``code`` lets the frontend show a specific
+    "paused for indexing" state instead of a generic error.
+    """
+    if job_manager.is_indexing():
+        raise HTTPException(
+            status_code=409,
+            detail={
+                "code": "indexing_in_progress",
+                "message": "Indexing in progress — querying is paused until it finishes.",
+            },
+        )
+
+
 @app.post("/api/search")
 def search(req: SearchRequest) -> dict:
     from .search.hybrid import hybrid_search
 
+    require_no_active_index_job()
     if not req.query.strip():
         raise HTTPException(status_code=400, detail="Empty query")
     scope = resolve_scope(req.sources, req.group_id)
@@ -247,6 +266,7 @@ def search(req: SearchRequest) -> dict:
 
 @app.post("/api/ask")
 def ask(req: AskRequest) -> StreamingResponse:
+    require_no_active_index_job()
     if not req.question.strip():
         raise HTTPException(status_code=400, detail="Empty question")
     # Resolve scope before the stream begins so a 400/404 surfaces as a normal

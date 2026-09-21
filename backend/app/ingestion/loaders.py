@@ -6,6 +6,7 @@ CSV row-batch, an epub chapter, a markdown/html document. Keeping sections
 separate lets the chunker attach meaningful location labels (page numbers,
 chapter titles) so large textbooks and bulk data stay navigable after indexing.
 """
+
 from __future__ import annotations
 
 import csv
@@ -13,6 +14,8 @@ import io
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Callable
+
+from .content_types import CONTENT_TABLE, CONTENT_TEXT
 
 
 @dataclass
@@ -24,6 +27,11 @@ class LoadedSection:
     location: str
     # Extra structured metadata merged into every chunk from this section.
     meta: dict = field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        # Every section declares a content_type; default to ordinary text so
+        # existing loaders need no change unless they produce tables/visuals.
+        self.meta.setdefault("content_type", CONTENT_TEXT)
 
 
 class UnsupportedFileType(Exception):
@@ -42,14 +50,75 @@ def load_markdown(path: Path) -> list[LoadedSection]:
     # Treat markdown as text; headings are preserved so the chunker and LLM can
     # use them as natural context.
     text = path.read_text(encoding="utf-8", errors="replace")
-    return [LoadedSection(text=text, location="full", meta={"format_detail": "markdown"})]
+    return [
+        LoadedSection(text=text, location="full", meta={"format_detail": "markdown"})
+    ]
+
+
+def _table_to_text(table: list[list]) -> str:
+    """Render a pdfplumber table (list of rows of cells) as pipe-delimited text.
+
+    Blank/None cells become empty strings so the row/column structure is
+    preserved even for sparse tables.
+    """
+    lines = []
+    for row in table:
+        cells = ["" if c is None else str(c).replace("\n", " ").strip() for c in row]
+        lines.append(" | ".join(cells))
+    return "\n".join(lines)
 
 
 def load_pdf(path: Path) -> list[LoadedSection]:
+    """Load a PDF page by page.
+
+    Uses pdfplumber (when available) to extract both native tables — preserving
+    row/column structure as pipe-delimited text tagged ``content_type=table`` —
+    and the remaining page text. Falls back to pypdf's flat text extraction per
+    page if pdfplumber is unavailable or errors on a page. Image-only tables and
+    figures are handled separately by the vision extractor when enabled.
+    """
+    sections: list[LoadedSection] = []
+
+    try:
+        import pdfplumber
+
+        with pdfplumber.open(str(path)) as pdf:
+            for i, page in enumerate(pdf.pages, start=1):
+                try:
+                    tables = page.extract_tables() or []
+                except Exception:
+                    tables = []
+                for t_idx, table in enumerate(tables, start=1):
+                    body = _table_to_text(table)
+                    if body.strip():
+                        sections.append(
+                            LoadedSection(
+                                text=body,
+                                location=f"p. {i} (table {t_idx})",
+                                meta={
+                                    "page": i,
+                                    "table": t_idx,
+                                    "content_type": CONTENT_TABLE,
+                                },
+                            )
+                        )
+                try:
+                    text = page.extract_text() or ""
+                except Exception:
+                    text = ""
+                if text.strip():
+                    sections.append(
+                        LoadedSection(text=text, location=f"p. {i}", meta={"page": i})
+                    )
+        return sections
+    except Exception:
+        # pdfplumber unavailable or failed to open the document — fall back to
+        # pypdf's page text extraction (no table structure, but text is kept).
+        sections = []
+
     from pypdf import PdfReader
 
     reader = PdfReader(str(path))
-    sections: list[LoadedSection] = []
     for i, page in enumerate(reader.pages, start=1):
         try:
             text = page.extract_text() or ""
@@ -102,7 +171,7 @@ def load_docx(path: Path) -> list[LoadedSection]:
                 LoadedSection(
                     text="\n".join(rows),
                     location=f"Table {t_idx}",
-                    meta={"table": t_idx},
+                    meta={"table": t_idx, "content_type": CONTENT_TABLE},
                 )
             )
     return sections
@@ -128,9 +197,7 @@ def load_csv(path: Path, rows_per_section: int = 100) -> list[LoadedSection]:
         for row_num, row in enumerate(reader, start=1):
             batch.append(" | ".join(row))
             if len(batch) >= rows_per_section:
-                sections.append(
-                    _csv_section(header_line, batch, start_row, row_num)
-                )
+                sections.append(_csv_section(header_line, batch, start_row, row_num))
                 batch = []
                 start_row = row_num + 1
         if batch:

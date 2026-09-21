@@ -52,6 +52,9 @@ def readiness() -> dict:
         "llm_ready": _present(settings.llm_model),
         "embed_model": settings.embed_model,
         "embed_ready": _present(settings.embed_model),
+        "vision_enabled": settings.vision_enabled,
+        "vision_model": settings.vision_model,
+        "vision_ready": _present(settings.vision_model),
         "installed_models": installed,
     }
 
@@ -62,6 +65,66 @@ def _ollama_reachable() -> bool:
         return True
     except Exception:
         return False
+
+
+def model_installed(target: str) -> bool:
+    """True if ``target`` (loosely, ignoring an optional :tag) is installed."""
+    base = target.split(":")[0]
+    return any(
+        name == target or name.split(":")[0] == base for name in available_models()
+    )
+
+
+# --------------------------------------------------------------------------
+# Vision
+# --------------------------------------------------------------------------
+def vision_available() -> bool:
+    """True when vision ingest is enabled and the configured VLM is installed.
+
+    Checked once at the start of an index job; if False, the job skips visual
+    extraction but still indexes text and native tables.
+    """
+    return settings.vision_enabled and model_installed(settings.vision_model)
+
+
+def vision_extract(
+    image_bytes: bytes, prompt: str, timeout_s: float | None = None
+) -> str:
+    """Extract text from a single image with the configured VLM.
+
+    The Ollama call runs in a worker thread and is joined with a wall-clock
+    timeout so one slow/huge image cannot stall an entire ingest. On timeout a
+    TimeoutError is raised for the caller to treat as a per-visual failure.
+    """
+    import threading
+
+    timeout_s = settings.vision_timeout_s if timeout_s is None else timeout_s
+    result: dict[str, object] = {}
+
+    def _run() -> None:
+        try:
+            resp = _client().generate(
+                model=settings.vision_model,
+                prompt=prompt,
+                images=[image_bytes],
+                options={
+                    "temperature": 0.1,
+                    "num_ctx": settings.llm_num_ctx,
+                },
+            )
+            result["text"] = resp.get("response", "")
+        except Exception as e:  # surfaced to the caller below
+            result["error"] = e
+
+    worker = threading.Thread(target=_run, daemon=True)
+    worker.start()
+    worker.join(timeout_s)
+    if worker.is_alive():
+        # The daemon thread is abandoned; it will not block process exit.
+        raise TimeoutError(f"vision_extract exceeded {timeout_s}s")
+    if "error" in result:
+        raise result["error"]  # type: ignore[misc]
+    return str(result.get("text", ""))
 
 
 # --------------------------------------------------------------------------
