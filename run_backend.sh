@@ -5,13 +5,27 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BACKEND_DIR="$SCRIPT_DIR/backend"
-VENV_UVICORN="$BACKEND_DIR/.venv/bin/uvicorn"
+
+# venv layout differs by OS: Unix/macOS uses .venv/bin, Windows uses
+# .venv/Scripts (with .exe). Support both so this works under Git Bash/MINGW
+# on Windows as well as macOS/Linux.
+if [ -x "$BACKEND_DIR/.venv/bin/uvicorn" ]; then
+  VENV_UVICORN="$BACKEND_DIR/.venv/bin/uvicorn"
+elif [ -x "$BACKEND_DIR/.venv/Scripts/uvicorn.exe" ]; then
+  VENV_UVICORN="$BACKEND_DIR/.venv/Scripts/uvicorn.exe"
+else
+  VENV_UVICORN=""
+fi
 
 # --- Sanity checks ---
-if [ ! -x "$VENV_UVICORN" ]; then
+if [ -z "$VENV_UVICORN" ]; then
   echo "Backend venv not found. Create it first:"
+  echo "  # macOS / Linux:"
   echo "  python3 -m venv backend/.venv"
   echo "  backend/.venv/bin/pip install -r backend/requirements.txt"
+  echo "  # Windows (Git Bash):"
+  echo "  py -m venv backend/.venv"
+  echo "  backend/.venv/Scripts/pip.exe install -r backend/requirements.txt"
   exit 1
 fi
 
