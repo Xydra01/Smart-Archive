@@ -6,7 +6,11 @@ pydantic==2.10.4
 pydantic-settings==2.7.1
 
 # --- Vector store & search ---
-chromadb==0.6.3
+# 1.x ships prebuilt wheels (cp39-abi3) for Windows/macOS/Linux, so pip does
+# NOT compile chroma-hnswlib from source — no C++ toolchain needed. (0.6.x was
+# sdist-only on some platforms and forced a source build.) We use only the
+# embedded PersistentClient, not the client/server mode the 1.x CVEs concern.
+chromadb==1.0.15
 rank-bm25==0.2.2
 
 # --- LLM / embeddings runtime ---
