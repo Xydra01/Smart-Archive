@@ -15,6 +15,7 @@ Stored as JSON at data/index_manifest.json. It's derived state — safe to delet
 (the next index run rebuilds it), and it's git-ignored along with the rest of
 data/.
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -29,7 +30,7 @@ from ..config import settings
 
 @dataclass
 class ManifestEntry:
-    source_path: str      # path relative to raw_dir
+    source_path: str  # path relative to raw_dir
     size: int
     mtime: float
     content_hash: str
@@ -62,8 +63,9 @@ class Manifest:
             return
         try:
             raw = json.loads(self._path.read_text(encoding="utf-8"))
-        except (json.JSONDecodeError, OSError):
-            # Corrupt or unreadable manifest: treat as empty; it will rebuild.
+        except Exception:
+            # Corrupt or unreadable manifest (bad JSON or I/O error): treat as
+            # empty; it will be rebuilt on the next index run.
             self._entries = {}
             return
         self._entries = {
@@ -71,7 +73,10 @@ class Manifest:
         }
 
     def _save(self) -> None:
-        payload = {"version": 1, "entries": {k: asdict(v) for k, v in self._entries.items()}}
+        payload = {
+            "version": 1,
+            "entries": {k: asdict(v) for k, v in self._entries.items()},
+        }
         tmp = self._path.with_suffix(".json.tmp")
         tmp.write_text(json.dumps(payload, indent=2), encoding="utf-8")
         tmp.replace(self._path)  # atomic on the same filesystem
@@ -102,6 +107,28 @@ class Manifest:
         )
         with self._lock:
             self._entries[rel] = entry
+            self._save()
+
+    def record_imported(self, rel: str, chunk_count: int) -> None:
+        """Mark a source present when its chunks came from an imported bundle.
+
+        Imported sources may have no local raw file, so we record a sentinel
+        signature (size -1, mtime 0, hash "imported"). Because that signature
+        can never match a real file's stat, ``is_unchanged`` returns False for
+        it — so if the user later drops the actual file into data/raw and
+        reindexes, it is treated as new and indexed locally rather than skipped.
+        """
+        import time
+
+        with self._lock:
+            self._entries[rel] = ManifestEntry(
+                source_path=rel,
+                size=-1,
+                mtime=0.0,
+                content_hash="imported",
+                chunk_count=chunk_count,
+                indexed_at=time.time(),
+            )
             self._save()
 
     def remove(self, rel: str) -> None:

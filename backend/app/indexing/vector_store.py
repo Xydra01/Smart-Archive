@@ -53,6 +53,32 @@ class VectorStore:
                 progress(done, total)
         return total
 
+    def add_precomputed(
+        self,
+        ids: list[str],
+        texts: list[str],
+        metadatas: list[dict],
+        embeddings: list[list[float]],
+        batch_size: int = 256,
+    ) -> int:
+        """Upsert chunks whose embeddings already exist (import path).
+
+        Unlike ``add_chunks`` this never calls the embedder — the vectors come
+        from an imported bundle. Batched to bound peak memory on large imports.
+        """
+        n = len(ids)
+        if n == 0:
+            return 0
+        for start in range(0, n, batch_size):
+            end = start + batch_size
+            self._collection.upsert(
+                ids=ids[start:end],
+                documents=texts[start:end],
+                metadatas=metadatas[start:end],
+                embeddings=embeddings[start:end],
+            )
+        return n
+
     def delete_by_source(self, source_path: str) -> None:
         self._collection.delete(where={"source_path": source_path})
 
@@ -107,6 +133,44 @@ class VectorStore:
         ):
             out.append({"id": cid, "text": doc, "metadata": meta})
         return out
+
+    def get_all_ids(self) -> set[str]:
+        """All chunk ids currently in the collection (for merge dedup on import)."""
+        res = self._collection.get(include=[])  # ids are always returned
+        return set(res.get("ids", []))
+
+    def iter_export(self, source_paths: set[str] | None = None):
+        """Yield (id, text, metadata, embedding) for export.
+
+        When ``source_paths`` is given, only chunks whose ``source_path``
+        metadata is in that set are yielded; otherwise every chunk is yielded.
+        Embeddings are explicitly included so a bundle can be built without
+        re-embedding on the receiving machine.
+        """
+        where = {"source_path": {"$in": sorted(source_paths)}} if source_paths else None
+        res = self._collection.get(
+            where=where, include=["documents", "metadatas", "embeddings"]
+        )
+        # Chroma returns embeddings as a numpy array, so avoid truthiness checks
+        # ("or []") which raise on arrays; test for None explicitly.
+        ids = res.get("ids")
+        ids = list(ids) if ids is not None else []
+        docs = res.get("documents")
+        docs = list(docs) if docs is not None else []
+        metas = res.get("metadatas")
+        metas = list(metas) if metas is not None else []
+        embs = res.get("embeddings")
+        embs = list(embs) if embs is not None else []
+        for i, cid in enumerate(ids):
+            emb = embs[i] if i < len(embs) else None
+            if emb is None:
+                continue
+            yield (
+                cid,
+                docs[i] if i < len(docs) else "",
+                metas[i] if i < len(metas) else {},
+                [float(x) for x in emb],
+            )
 
     def count(self) -> int:
         return self._collection.count()

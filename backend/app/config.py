@@ -53,6 +53,12 @@ class Settings(BaseSettings):
     rrf_k: int = 60  # reciprocal-rank-fusion constant
     max_selection: int = 10_000  # cap on sources in a single scoped query
 
+    # --- Portable index bundles (export/import) ---
+    bundle_default_gzip: bool = True  # gzip exported bundles by default
+    # Per-record size cap read before JSON parsing, so a single oversized line
+    # in an untrusted bundle can't exhaust memory on import.
+    bundle_max_record_bytes: int = 16 * 1024 * 1024
+
     # --- Vision ingest (opt-in; slow, so default off) ---
     # When on, a local vision-language model extracts searchable text from
     # charts, diagrams, figures, and image-only tables during indexing. This is

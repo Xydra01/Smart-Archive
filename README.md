@@ -173,6 +173,106 @@ The archive is built to hold a lot of material without re-doing work.
 - **Deletions** are handled automatically: files removed from `data/raw` are
   pruned from both the vector store and the manifest on the next index run.
 
+## Portable index bundles (export / import / merge)
+
+Indexing is the expensive part — embedding a large library can take hours. A
+**portable bundle** lets you do that work **once** and share the result. Build
+the index on a fast machine (or a GPU desktop), export a bundle, and hand it to
+a laptop or a collaborator who can then query it **without re-embedding
+anything**. Bundles also **merge**, so several people can pool their indexed
+material into one archive.
+
+A bundle is a single file containing the indexed chunks — their text, their
+embedding vectors, and metadata (source, page/location, content type). It does
+**not** contain your raw documents, only the derived index.
+
+### Export
+
+Run from inside `backend/` with the venv:
+
+```bash
+# everything in the index
+./.venv/bin/python export_index.py archive.jsonl.gz
+
+# only specific source files
+./.venv/bin/python export_index.py project.jsonl.gz --sources report.pdf notes.md
+
+# only the sources in a group
+./.venv/bin/python export_index.py grp.jsonl.gz --group <group_id>
+
+# plain JSONL instead of gzip (larger, but human-inspectable)
+./.venv/bin/python export_index.py plain.jsonl --no-gzip
+```
+
+Export prints how many chunks were written, the embedding model and dimension
+they were built with, whether vision-derived chunks are included, and a
+per-source count.
+
+### Import & merge
+
+```bash
+./.venv/bin/python import_index.py archive.jsonl.gz
+```
+
+Import **merges by content**: each chunk has an id derived from its content
+(source file name, location, content type, and text), so importing is a
+**union** —
+
+- chunks you already have are recognized and **skipped** (no duplicates),
+- chunks you don't have are **added**,
+- re-importing the same bundle is safe and adds nothing (idempotent).
+
+This makes pooling archives painless: two people export their bundles, import
+each other's, and both end up with the union of the two indexes.
+
+Use `--replace-sources` to instead **replace** your existing chunks for every
+source that appears in the bundle (scoped to just those sources) before merging
+— handy when a source was re-indexed with better settings and you want the
+incoming version to win rather than dedup against the old one.
+
+### Text-only → vision enrichment
+
+Because chunk ids are content-based, a **text-only** archive and a
+**vision-enabled** archive of the same documents share ids for their text
+chunks but differ on the extra chunks vision produces (chart/figure/table
+descriptions). So if you indexed without vision and a collaborator indexed the
+same files *with* vision, importing their bundle **fills in exactly the missing
+visual chunks** — the text chunks dedup, and you gain the information that was
+locked in images and charts, without re-running vision yourself.
+
+### Embedding-model compatibility (important)
+
+Embeddings from different models live in **different vector spaces** and cannot
+be mixed — doing so would silently corrupt retrieval. Import therefore
+**refuses** a bundle whose embedding model or dimension doesn't match your
+installation (`ARCHIVE_EMBED_MODEL`). If you need to combine archives built with
+different embedding models, pick one model and re-index on both sides first.
+
+A **checksum mismatch** (a truncated or corrupted file) only prints a warning
+rather than refusing, since a partial import may still be useful; re-export if
+you see it.
+
+### Format & safety
+
+- **Format.** gzip-compressed JSONL (`.jsonl.gz`; `--no-gzip` for plain
+  `.jsonl`). The first line is a header (embedding model, dimension, chunk
+  count, checksum, whether vision chunks are included, per-source counts); each
+  remaining line is one chunk record. BM25 is rebuilt from the imported text on
+  import, so bundles don't depend on any keyword-index internals.
+- **Concurrency.** Export and import refuse to run while an indexing job is in
+  progress (and vice-versa), so the index is never read or written half-formed.
+- **Untrusted input.** Import validates every record and enforces size caps,
+  skipping malformed lines (and reporting the count) rather than trusting a
+  bundle blindly.
+
+### One-time re-index to adopt content-based ids
+
+Content-based chunk ids are what make cross-machine dedup and merging work. If
+your archive was indexed by an **older** version of Smart Archive (which used
+path-based ids), run **Force re-index all** once (UI, or
+`POST /api/index?force=true`) so your chunks pick up the new ids before you
+export or import bundles. This is a one-time step.
+
 ## Configuration
 
 All tunables live in `backend/app/config.py` and can be overridden with
@@ -193,6 +293,11 @@ All tunables live in `backend/app/config.py` and can be overridden with
 - `ARCHIVE_CHUNK_TOKENS`, `ARCHIVE_CHUNK_OVERLAP_TOKENS`
 - `ARCHIVE_FUSION_TOP_K` — chunks handed to the LLM after fusion
 - `ARCHIVE_SEMANTIC_TOP_K`, `ARCHIVE_KEYWORD_TOP_K`
+
+**Portable bundles** (see [Portable index bundles](#portable-index-bundles-export--import--merge))
+- `ARCHIVE_BUNDLE_DEFAULT_GZIP` — gzip exported bundles by default (default `true`)
+- `ARCHIVE_BUNDLE_MAX_RECORD_BYTES` — per-record size cap on import, in bytes
+  (default `16777216`); guards against malformed/oversized input
 
 ## Notes
 

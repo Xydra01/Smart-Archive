@@ -81,14 +81,32 @@ def _split_tokens(text: str, chunk_tokens: int, overlap: int) -> list[str]:
     return pieces
 
 
-def _chunk_id(source_path: str, location: str, index: int, text: str) -> str:
+def _chunk_id(
+    source_file: str,
+    location: str,
+    content_type: str,
+    text: str,
+    occurrence: int,
+) -> str:
+    """Content-derived, portable chunk id.
+
+    Hashes only stable content — the source *file name* (not its directory
+    path), the chunk's location label, its content_type, an intra-source
+    occurrence counter, and the chunk text. Deliberately excludes the relative
+    directory path and any whole-document global position so that:
+
+      * the same document content gets the same id on any machine, regardless
+        of where the file lives (portable merge across installations); and
+      * a document's text-chunk ids are identical whether or not vision ran
+        (vision only appends new sections, so it never shifts these ids).
+
+    ``occurrence`` disambiguates genuine duplicate chunks *within one source*
+    that would otherwise share (file, location, content_type, text).
+    """
     h = hashlib.sha1()
-    h.update(source_path.encode("utf-8"))
-    h.update(b"\x00")
-    h.update(location.encode("utf-8"))
-    h.update(b"\x00")
-    h.update(str(index).encode("utf-8"))
-    h.update(b"\x00")
+    for part in (source_file, location, content_type, str(occurrence)):
+        h.update(part.encode("utf-8"))
+        h.update(b"\x00")
     h.update(text.encode("utf-8"))
     return h.hexdigest()
 
@@ -118,11 +136,20 @@ def chunk_sections(
                 raw.append((piece, section.location, section.meta))
 
     total = len(raw)
+    # Track how many times each (location, content_type, text) key has been
+    # seen within this source so genuine duplicates get distinct ids via an
+    # occurrence counter — without the id depending on the global position
+    # (which would shift when vision appends sections).
+    seen: dict[tuple[str, str, str], int] = {}
     chunks: list[Chunk] = []
     for idx, (text, location, extra) in enumerate(raw):
+        content_type = extra.get("content_type", CONTENT_TEXT)
+        key = (location, content_type, text)
+        occurrence = seen.get(key, 0)
+        seen[key] = occurrence + 1
         chunks.append(
             Chunk(
-                id=_chunk_id(rel, location, idx, text),
+                id=_chunk_id(source_file, location, content_type, text, occurrence),
                 text=text,
                 source_file=source_file,
                 source_path=rel,
