@@ -10,6 +10,7 @@ Examples (run from the backend/ directory with the venv):
     ./.venv/bin/python import_index.py archive.jsonl.gz
     ./.venv/bin/python import_index.py project.jsonl.gz --replace-sources
 """
+
 from __future__ import annotations
 
 import argparse
@@ -41,11 +42,19 @@ def main(argv: list[str] | None = None) -> int:
     # Lock is also enforced inside import_bundle; check here for a clean message
     # and exit code before doing any work.
     if job_manager.is_indexing():
-        print("Refused: indexing is in progress. Try again once it finishes.", file=sys.stderr)
+        print(
+            "Refused: indexing is in progress. Try again once it finishes.",
+            file=sys.stderr,
+        )
         return 2
 
+    print(f"Importing {path} ...", flush=True)
     try:
-        report = import_bundle(path, replace_sources=args.replace_sources)
+        report = import_bundle(
+            path,
+            replace_sources=args.replace_sources,
+            progress=lambda msg: print(msg, flush=True),
+        )
     except ImportError_ as e:
         print(f"Import refused: {e}", file=sys.stderr)
         return 1

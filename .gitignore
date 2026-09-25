@@ -20,6 +20,12 @@ data/index_manifest.json.tmp
 # Persistent source groups (derived per-user state)
 data/groups.json
 data/groups.json.tmp
+# Persistent per-source citation metadata (derived per-user state)
+data/source_metadata.json
+data/source_metadata.json.tmp
+# Portable index bundles (exported chunks+vectors; user data, can be large).
+*.jsonl
+*.jsonl.gz
 # Any local model weights or GGUF files that get downloaded locally
 *.gguf
 *.bin

@@ -11,11 +11,20 @@ from __future__ import annotations
 
 import csv
 import io
+import logging
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Callable
 
 from .content_types import CONTENT_TABLE, CONTENT_TEXT
+
+# pdfminer (used by pdfplumber) logs a WARNING for every glyph/font quirk it
+# encounters — e.g. "Could not get FontBBox from font descriptor". These are
+# cosmetic: text extraction still succeeds, so on a large PDF library they just
+# flood the console and hide real progress. Raise those loggers to ERROR so
+# only genuine failures surface. Scoped to pdfminer; our own logs are untouched.
+for _noisy in ("pdfminer", "pdfminer.pdffont", "pdfminer.pdfinterp"):
+    logging.getLogger(_noisy).setLevel(logging.ERROR)
 
 
 @dataclass

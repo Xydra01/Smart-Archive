@@ -17,6 +17,7 @@ Safety:
 After adding chunks, the BM25 keyword index is rebuilt and the manifest is
 updated so imported sources are searchable and recorded.
 """
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -55,13 +56,22 @@ def import_bundle(
     *,
     replace_sources: bool = False,
     batch_size: int = 256,
+    progress=None,
 ) -> dict:
     """Merge a bundle into the archive. Returns a report dict.
+
+    ``progress`` is an optional callable invoked with short status strings as
+    the import proceeds (e.g. after each batch and before the keyword rebuild),
+    so a CLI can show liveness on large bundles. Defaults to None (silent).
 
     Raises ImportError_ for whole-bundle refusals (indexing in progress, bad
     header, unsupported version, embedding mismatch).
     """
     in_path = Path(in_path)
+
+    def _report(msg: str) -> None:
+        if progress:
+            progress(msg)
 
     # 1) Lock: never run concurrently with an index job.
     if job_manager.is_indexing():
@@ -115,12 +125,17 @@ def import_bundle(
         nonlocal added
         if not buf_ids:
             return
-        store.add_precomputed(buf_ids, buf_text, buf_meta, buf_emb, batch_size=batch_size)
+        store.add_precomputed(
+            buf_ids, buf_text, buf_meta, buf_emb, batch_size=batch_size
+        )
         added += len(buf_ids)
         buf_ids.clear()
         buf_text.clear()
         buf_meta.clear()
         buf_emb.clear()
+        _report(
+            f"  added {added} chunks (skipped {skipped_existing} existing so far)..."
+        )
 
     for rec in records:
         if rec.id in existing or rec.id in seen_this_run:
@@ -143,6 +158,10 @@ def import_bundle(
         # (indexer imports vision/loaders which don't need bundles).
         from ..indexing.indexer import _rebuild_keyword_index
 
+        _report(
+            "rebuilding keyword (BM25) index over all chunks — this reads "
+            "every chunk back and can take a bit on a large archive..."
+        )
         _rebuild_keyword_index()
         manifest = get_manifest()
         for sp, n in per_source_added.items():
