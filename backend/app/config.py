@@ -26,6 +26,7 @@ class Settings(BaseSettings):
     keyword_dir: Path = ARCHIVE_ROOT / "data" / "keyword"
     # Persisted source groups, kept beside the index manifest (separate file).
     groups_file: Path = ARCHIVE_ROOT / "data" / "groups.json"
+    source_metadata_file: Path = ARCHIVE_ROOT / "data" / "source_metadata.json"
 
     # --- Ollama / models ---
     ollama_host: str = "http://localhost:11434"

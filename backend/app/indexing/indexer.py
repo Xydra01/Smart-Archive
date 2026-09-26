@@ -15,6 +15,7 @@ from ..ingestion import vision
 from ..ingestion.chunker import chunk_sections
 from ..ingestion.loaders import load_document, SUPPORTED_EXTENSIONS, UnsupportedFileType
 from ..llm import ollama_client
+from ..references.store import get_source_metadata_store
 from .jobs import Job
 from .keyword_index import get_keyword_index
 from .manifest import get_manifest
@@ -290,6 +291,7 @@ def remove_source(source_path: str) -> dict:
     store.delete_by_source(source_path)
     get_manifest().remove(source_path)
     get_group_store().prune_source(source_path)
+    get_source_metadata_store().prune_source(source_path)  # Req 4.11
     _rebuild_keyword_index()
     return {"removed": source_path, "total_chunks": store.count()}
 
@@ -302,6 +304,7 @@ def reset_index() -> dict:
     for rel in list(manifest.entries().keys()):
         manifest.remove(rel)
     get_group_store().clear_all_members()
+    get_source_metadata_store().clear_all()  # Req 4.11
     _rebuild_keyword_index()
     return {"reset": True, "total_chunks": store.count()}
 

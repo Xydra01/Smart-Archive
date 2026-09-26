@@ -1,0 +1,657 @@
+{
+  "pbtResults": {},
+  "executionHistory": {
+    "1.1 Add the metadata-store setting to `backend/app/config.py`": [
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790456649515
+      },
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790456663593
+      },
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790456809654
+      }
+    ],
+    "1.2 Create the `backend/app/references/` package": [
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790456649572
+      },
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790456664277
+      },
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790456810339
+      }
+    ],
+    "2.1 Implement `SourceMetadata` and `SourceMetadataStore` in `backend/app/references/store.py`": [
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790456649606
+      },
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790456818434
+      },
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790456979190
+      }
+    ],
+    "3.1 Implement `effective_record(...)` in `backend/app/references/effective.py`": [
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790456649660
+      },
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790456997165
+      },
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790457126405
+      }
+    ],
+    "3.2 Implement `display_name(...)` in `backend/app/references/display_name.py`": [
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790456649680
+      },
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790456998099
+      },
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790457127812
+      }
+    ],
+    "4.1 Implement the formatter core and `required_fields` in `backend/app/references/formatter.py`": [
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790456649710
+      },
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790457133752
+      },
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790457382799
+      }
+    ],
+    "4.2 Implement the verbatim-override short-circuit in `format_citation`": [
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790456649753
+      },
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790457384102
+      }
+    ],
+    "4.3 Implement MLA and APA element assembly and fallbacks": [
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790456649794
+      },
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790457385069
+      }
+    ],
+    "5.1 Implement the parser intermediates and dispatch in `backend/app/references/import_parsers.py`": [
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790456649829
+      },
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790457134460
+      },
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790457386537
+      }
+    ],
+    "5.2 Implement `parse_bibtex`, `parse_ris`, `parse_csljson` (structured, multi-entry)": [
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790456649887
+      },
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790457387966
+      }
+    ],
+    "5.3 Implement `parse_verbatim(text, style)`": [
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790456649918
+      },
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790457388573
+      }
+    ],
+    "6.1 Implement the bibliography comparator (shared by Ask block and export)": [
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790456649939
+      },
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790456999261
+      },
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790457128537
+      }
+    ],
+    "7. Checkpoint — Ensure all pure-logic tests pass": [
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790456649965
+      },
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790457819819
+      }
+    ],
+    "8.1 Add the Pydantic models and a `_require_indexed` helper in `backend/app/main.py`": [
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790456650008
+      },
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790457829652
+      },
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790458163543
+      }
+    ],
+    "8.2 Implement `GET /api/references` and `GET /api/references/{source_path:path}`": [
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790456650052
+      },
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790457831055
+      },
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790458159279
+      }
+    ],
+    "8.3 Implement `PUT /api/references/{source_path:path}` (update)": [
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790456650107
+      },
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790457832091
+      },
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790458160139
+      }
+    ],
+    "8.4 Implement `POST /api/references/format` (batch format)": [
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790456650155
+      },
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790457833397
+      },
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790458161879
+      }
+    ],
+    "8.5 Implement `POST /api/references/{source_path:path}/import`": [
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790456650198
+      },
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790457834172
+      },
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790458162447
+      }
+    ],
+    "9.1 Hook prune/reset into `backend/app/indexing/indexer.py`": [
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790456650235
+      },
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790458176702
+      },
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790458302716
+      }
+    ],
+    "9.2 Add `display_name` to citations in `backend/app/llm/rag.py`": [
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790456650307
+      },
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790458178154
+      },
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790458300385
+      }
+    ],
+    "9.3 Add `display_name` to `GET /api/selectable-sources` in `backend/app/main.py`": [
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790456650367
+      },
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790458181695
+      },
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790458301724
+      }
+    ],
+    "10. Checkpoint — Ensure API and wiring tests pass": [
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790456650404
+      },
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790458737807
+      }
+    ],
+    "11.1 Add types and client functions to `frontend/app/api.ts`": [
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790456650442
+      }
+    ],
+    "12.1 Build the References_View panel/route under `frontend/app/`": [
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790456650487
+      }
+    ],
+    "12.2 Add client-side validation, save, and error/timeout handling": [
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790456650530
+      }
+    ],
+    "12.3 Add the live citation preview": [
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790456650568
+      }
+    ],
+    "12.4 Add the reference import control": [
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790456650631
+      }
+    ],
+    "13.1 Add the Style_Selector to `frontend/app/page.tsx`": [
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790456650706
+      }
+    ],
+    "13.2 Add the Bibliography_Block and its client-side formatting": [
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790456650768
+      }
+    ],
+    "14. Checkpoint — Ensure frontend tests pass": [
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790456650843
+      }
+    ],
+    "1. Add configuration and the references module skeleton": [
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790456810375
+      }
+    ],
+    "2. Implement the Metadata_Store": [
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790456979223
+      }
+    ],
+    "3. Implement the effective-record layer and the display_name resolver": [
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790457127908
+      }
+    ],
+    "6. Implement the ordering comparator": [
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790457128579
+      }
+    ],
+    "4. Implement the Citation_Formatter (MLA + APA)": [
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790457385096
+      }
+    ],
+    "5. Implement the import parsers (BibTeX / RIS / CSL-JSON / Verbatim)": [
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790457388607
+      }
+    ],
+    "2.2 Write property test for store round-trip and absent-stays-absent": [
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790457799387
+      }
+    ],
+    "2.3 Write property test for corrupt/missing load tolerance": [
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790457800349
+      }
+    ],
+    "2.4 Write property test for prune/clear lifecycle hooks": [
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790457801792
+      }
+    ],
+    "2.5 Write a unit test for the atomic-write mechanism": [
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790457802617
+      }
+    ],
+    "3.3 Write property test for the title fallback": [
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790457803517
+      }
+    ],
+    "3.4 Write property test for display-name resolution": [
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790457804963
+      }
+    ],
+    "4.4 Write property test for formatter totality and title-bearing output": [
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790457805923
+      }
+    ],
+    "4.5 Write property test for formatter determinism": [
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790457806897
+      }
+    ],
+    "4.6 Write property test for the incomplete marker": [
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790457807827
+      }
+    ],
+    "4.7 Write property test for the no-author title position": [
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790457808746
+      }
+    ],
+    "4.8 Write property test for APA `(n.d.)`": [
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790457810168
+      }
+    ],
+    "4.9 Write property test for verbatim override precedence and isolation": [
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790457811100
+      }
+    ],
+    "4.10 Write example unit tests for exact MLA/APA strings": [
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790457812484
+      }
+    ],
+    "5.4 Write property test for structured field mapping and type inference": [
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790457813421
+      }
+    ],
+    "5.5 Write property test for parser totality": [
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790457814439
+      }
+    ],
+    "5.6 Write property test for date-precision preservation": [
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790457815320
+      }
+    ],
+    "5.7 Write property test for replaceable/idempotent one-at-a-time import": [
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790457816723
+      }
+    ],
+    "5.8 Add checked-in parser fixtures": [
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790457817679
+      }
+    ],
+    "6.2 Write property test for the ordering total order": [
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790457818680
+      }
+    ],
+    "8. Implement the Metadata_API endpoints and Pydantic models": [
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790458163569
+      }
+    ],
+    "9. Wire index-lifecycle hooks and display_name into existing backend paths": [
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790458302800
+      }
+    ],
+    "8.6 Write property test for list-all coverage": [
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790458728651
+      }
+    ],
+    "8.8 Write property test for the unknown-source 404": [
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790458729613
+      }
+    ],
+    "8.7 Write property test for update-then-read round-trip": [
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790458730547
+      }
+    ],
+    "8.9 Write property test for the style gate": [
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790458731472
+      }
+    ],
+    "8.10 Write property test for the disallowed source_type": [
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790458732902
+      }
+    ],
+    "8.11 Write property test for batch-format coverage": [
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790458733796
+      }
+    ],
+    "8.12 Write import API example tests": [
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790458734851
+      }
+    ],
+    "9.4 Write an integration test for the indexer hooks": [
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790458735701
+      }
+    ],
+    "9.5 Write wiring tests for display_name": [
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790458737104
+      }
+    ]
+  }
+}

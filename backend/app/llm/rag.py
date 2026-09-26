@@ -13,8 +13,28 @@ from __future__ import annotations
 
 from typing import Iterator
 
+from ..references.display_name import display_name
+from ..references.store import get_source_metadata_store
 from ..search.hybrid import hybrid_search
 from . import ollama_client
+
+
+def _resolve_display_name(source_path, source_file: str) -> str:
+    """Resolve a citation's display label (title else file name), defensively.
+
+    Looks up any stored title for ``source_path`` and hands it to the shared
+    ``display_name`` resolver. A store error must never break answering, so any
+    lookup failure falls back to the file name (Req 9.3).
+    """
+    stored_title = None
+    try:
+        record = get_source_metadata_store().get(source_path)
+        if record is not None:
+            stored_title = record.title
+    except Exception:
+        stored_title = None
+    return display_name(source_path, stored_title, source_file)
+
 
 # --- Pass 1: synthesized summary ------------------------------------------
 SUMMARY_SYSTEM = (
@@ -65,11 +85,13 @@ def _format_context(hits: list[dict]) -> tuple[str, list[dict]]:
         location = md.get("location", "")
         label = f"{source} ({location})" if location else source
         lines.append(f"[{i}] {label}\n{hit.get('text', '').strip()}")
+        source_path = md.get("source_path")
         citations.append(
             {
                 "index": i,
                 "source_file": source,
-                "source_path": md.get("source_path"),
+                "source_path": source_path,
+                "display_name": _resolve_display_name(source_path, source),
                 "location": location,
                 "file_type": md.get("file_type"),
                 "content_type": md.get("content_type", "text"),
