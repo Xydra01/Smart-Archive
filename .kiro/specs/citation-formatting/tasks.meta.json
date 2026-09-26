@@ -350,6 +350,16 @@
         "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
         "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
         "timestamp": 1790456650442
+      },
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790458883118
+      },
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790458968484
       }
     ],
     "12.1 Build the References_View panel/route under `frontend/app/`": [
@@ -357,6 +367,16 @@
         "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
         "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
         "timestamp": 1790456650487
+      },
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790458981169
+      },
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790459243671
       }
     ],
     "12.2 Add client-side validation, save, and error/timeout handling": [
@@ -364,6 +384,16 @@
         "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
         "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
         "timestamp": 1790456650530
+      },
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790458982493
+      },
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790459240540
       }
     ],
     "12.3 Add the live citation preview": [
@@ -371,6 +401,16 @@
         "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
         "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
         "timestamp": 1790456650568
+      },
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790458983405
+      },
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790459244668
       }
     ],
     "12.4 Add the reference import control": [
@@ -378,6 +418,16 @@
         "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
         "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
         "timestamp": 1790456650631
+      },
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790458984349
+      },
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790459241803
       }
     ],
     "13.1 Add the Style_Selector to `frontend/app/page.tsx`": [
@@ -385,6 +435,16 @@
         "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
         "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
         "timestamp": 1790456650706
+      },
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790459250843
+      },
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790459571714
       }
     ],
     "13.2 Add the Bibliography_Block and its client-side formatting": [
@@ -392,6 +452,16 @@
         "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
         "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
         "timestamp": 1790456650768
+      },
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790459249484
+      },
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790459570756
       }
     ],
     "14. Checkpoint — Ensure frontend tests pass": [
@@ -399,6 +469,11 @@
         "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
         "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
         "timestamp": 1790456650843
+      },
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790459573908
       }
     ],
     "1. Add configuration and the references module skeleton": [
@@ -651,6 +726,84 @@
         "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
         "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
         "timestamp": 1790458737104
+      }
+    ],
+    "11. Extend the frontend API client": [
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790458968520
+      }
+    ],
+    "12.5 Write the ISO date validator and its property test": [
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790458985209
+      },
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790459242764
+      }
+    ],
+    "12. Implement the References_View": [
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790459244695
+      }
+    ],
+    "13.3 Write property test for distinct-source mapping": [
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790459251809
+      },
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790459569834
+      }
+    ],
+    "13.4 Write Ask_View component tests": [
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790459252744
+      },
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790459568488
+      }
+    ],
+    "13. Implement the Ask_View Style_Selector and Bibliography_Block": [
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790459571750
+      }
+    ],
+    "16.1 Run the full backend test suite from `backend/.venv`": [
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790459624383
+      }
+    ],
+    "16. Final verification": [
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790459624433
+      }
+    ],
+    "16.2 Build the frontend": [
+      {
+        "executionId": "fdcc6902-9ba9-4123-8b8d-4a893e7bfc96",
+        "chatSessionId": "sess_461b9e3f-cf27-47ab-bc4b-0c1b2215f8fc",
+        "timestamp": 1790459624877
       }
     ]
   }

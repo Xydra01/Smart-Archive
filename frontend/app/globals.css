@@ -425,3 +425,148 @@ a {
   color: var(--muted);
   font-size: 12px;
 }
+
+/* ---------------------------------------------------------------------------
+   References / Citations (References_View)
+   --------------------------------------------------------------------------- */
+
+.references-view {
+  margin-top: 12px;
+}
+
+.ref-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ref-row {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  background: var(--panel-2);
+}
+
+.ref-row-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ref-row-head .ref-name {
+  font-weight: 600;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 40%;
+}
+
+.ref-row-head .ref-path {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 11px;
+}
+
+.ref-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin-top: 8px;
+  font-size: 12px;
+}
+
+.ref-missing {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--danger);
+}
+
+.ref-edit {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+}
+
+.ref-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.ref-field .input,
+.ref-field .select {
+  font-size: 13px;
+  padding: 8px 10px;
+}
+
+.ref-textarea {
+  resize: vertical;
+  font-family: inherit;
+  line-height: 1.4;
+}
+
+.ref-error {
+  color: var(--danger);
+  font-size: 12px;
+}
+
+.ref-preview {
+  border-top: 1px dashed var(--border);
+  padding-top: 10px;
+}
+
+.ref-preview-text {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+.ref-preview-note {
+  margin-top: 6px;
+  font-size: 11px;
+}
+
+.ref-import {
+  border-top: 1px dashed var(--border);
+  padding-top: 10px;
+}
+
+.ref-import-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+/* Ask_View Bibliography_Block (Works Cited / References) */
+.bibliography {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bib-entry {
+  padding: 10px 0;
+  border-top: 1px solid var(--border);
+  font-size: 14px;
+  line-height: 1.5;
+  /* Hanging indent, mirroring how bibliographies wrap continuation lines. */
+  padding-left: 2em;
+  text-indent: -2em;
+}
+
+.bib-entry:first-child {
+  border-top: none;
+}
+
+.bib-incomplete {
+  font-style: italic;
+}

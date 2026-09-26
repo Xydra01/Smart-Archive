@@ -251,31 +251,31 @@ implemented by default.
 - [x] 10. Checkpoint — Ensure API and wiring tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 11. Extend the frontend API client
-  - [~] 11.1 Add types and client functions to `frontend/app/api.ts`
+- [x] 11. Extend the frontend API client
+  - [x] 11.1 Add types and client functions to `frontend/app/api.ts`
     - Types: `SourceType`, `CitationStyle`, `StyleSelection`, `SourceMetadata` (incl. `verbatim_overrides`, `display_name`, `missing_required`, `is_complete`), `FormattedCitation`, `ImportFormat`
     - Functions (typed `fetch`, throw on non-OK): `listReferences`, `getReference`, `updateReference`, `formatCitations`, `importReference`
     - Read the `display_name` field now present on selectable-sources and citation payloads, falling back to the file name so existing behavior is preserved
     - _Requirements: 9.3_
 
-- [ ] 12. Implement the References_View
-  - [~] 12.1 Build the References_View panel/route under `frontend/app/`
+- [x] 12. Implement the References_View
+  - [x] 12.1 Build the References_View panel/route under `frontend/app/`
     - New collapsible panel (consistent with the Groups manager) or sibling route; on load calls `listReferences()`
     - Lists every indexed source by `source_path` (Req 5.1); no-sources empty state (Req 5.2); each row shows effective metadata with an explicit empty marker per absent field (Req 5.3) and names each field still required for the current `source_type` from `missing_required` (Req 5.9)
     - Edit form: `source_type` `<select>` limited to the five types (Req 5.4); inputs for `authors` (as a list), `title`, `container`, `publisher`, `publication_date`, `url`, `access_date`, each bounded to 2000 chars (Req 5.5)
     - Rows label sources by `display_name` (Req 9.3)
     - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5, 5.9, 9.3_
-  - [~] 12.2 Add client-side validation, save, and error/timeout handling
+  - [x] 12.2 Add client-side validation, save, and error/timeout handling
     - Validate `url` and date fields before sending; invalid fields flagged, save not sent, entered values preserved (Req 5.8) using the same ISO-date predicate as Property 19
     - Save via `updateReference(...)`; on success the row reflects saved values (Req 5.6); a failure or a >10s timeout (`AbortController` deadline) shows an error and keeps entered values (Req 5.7)
     - _Requirements: 5.6, 5.7, 5.8_
-  - [~] 12.3 Add the live citation preview
+  - [x] 12.3 Add the live citation preview
     - While editing, show the formatted citation in the currently selected style, refreshed within ~1s of an edit via a debounced `formatCitations([source_path], style)`; default to MLA when the Style_Selector is Off
     - _Requirements: 5.10, 1.4_
-  - [~] 12.4 Add the reference import control
+  - [x] 12.4 Add the reference import control
     - A control that posts to `importReference(...)` for BibTeX/RIS/CSL-JSON/Verbatim (with `entry` selector and, for verbatim, `style`) and reflects the returned view (incl. `display_name`/`verbatim_overrides`)
     - _Requirements: 8.1_
-  - [ ]* 12.5 Write the ISO date validator and its property test
+  - [x]* 12.5 Write the ISO date validator and its property test
     - Implement the date predicate (accept iff a valid `YYYY-MM-DD` calendar date; reject malformed shapes and impossible dates like `2023-02-30`), used by 12.2
     - **Property 19: The date validator accepts exactly ISO calendar dates**
     - **Validates: Requirements 5.8**
@@ -283,23 +283,23 @@ implemented by default.
     - One row per indexed source; empty state; empty markers for absent fields; type dropdown offers exactly five types; invalid url/date flagged and not sent; save success/failure/timeout paths; live preview updates on edit; rows labeled by `display_name`; import control posts to the (mocked) import endpoint and reflects the returned view
     - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.6, 5.7, 5.8, 5.10, 8.1, 9.3_
 
-- [ ] 13. Implement the Ask_View Style_Selector and Bibliography_Block
-  - [~] 13.1 Add the Style_Selector to `frontend/app/page.tsx`
+- [x] 13. Implement the Ask_View Style_Selector and Bibliography_Block
+  - [x] 13.1 Add the Style_Selector to `frontend/app/page.tsx`
     - A `<select>` with exactly `Off`/`MLA`/`APA` (Req 6.1) defaulting to `Off` (Req 6.2), held in `useState<StyleSelection>("off")`
     - Keep the existing inline `[n]` markers and Sources panel rendering independent of the selector (Req 6.11)
     - _Requirements: 6.1, 6.2, 6.11_
-  - [~] 13.2 Add the Bibliography_Block and its client-side formatting
+  - [x] 13.2 Add the Bibliography_Block and its client-side formatting
     - Render beneath the Sources panel only when the selector is MLA/APA *and* there is ≥1 cited source (Req 6.3, 6.4, 6.5); title "Works Cited" for MLA, "References" for APA (Req 6.6, 6.7)
     - Compute the distinct `source_path`s among the current `citations`, call `formatCitations(distinctPaths, style)`, sort with the ordering comparator (client-side mirror of Property 17), and render; changing the style re-issues `formatCitations` and re-renders within ~1s **without** calling `/api/ask` again (Req 6.10)
     - _Requirements: 6.3, 6.4, 6.5, 6.6, 6.7, 6.8, 6.9, 6.10_
-  - [ ]* 13.3 Write property test for distinct-source mapping
+  - [x]* 13.3 Write property test for distinct-source mapping
     - **Property 16: The bibliography has one entry per distinct cited source** (pure client-side mapping over generated citation lists)
     - **Validates: Requirements 6.4, 6.5**
-  - [ ]* 13.4 Write Ask_View component tests
+  - [x]* 13.4 Write Ask_View component tests
     - Style_Selector has exactly Off/MLA/APA and defaults to Off; Off hides the block; MLA→"Works Cited", APA→"References"; block hidden with zero cited sources; switching style calls the (mocked) `format` endpoint rather than `/api/ask`; inline `[n]` markers and the Sources list unaffected by the selector
     - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5, 6.6, 6.7, 6.10, 6.11_
 
-- [~] 14. Checkpoint — Ensure frontend tests pass
+- [x] 14. Checkpoint — Ensure frontend tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 15. Bibliography export (stretch, Requirement 10)
@@ -313,10 +313,10 @@ implemented by default.
     - A control that fetches the export in the active style and presents the ordered bibliography (reusing the same rendering as the Bibliography_Block)
     - _Requirements: 10.1_
 
-- [ ] 16. Final verification
-  - [ ]* 16.1 Run the full backend test suite from `backend/.venv`
+- [x] 16. Final verification
+  - [x]* 16.1 Run the full backend test suite from `backend/.venv`
     - Run `pytest` (property tests at ≥100 Hypothesis iterations, tagged `Feature: citation-formatting, Property N: ...`); fix any failures
-  - [ ]* 16.2 Build the frontend
+  - [x]* 16.2 Build the frontend
     - Run the Next.js build to confirm the new client functions, References_View, Style_Selector, and Bibliography_Block compile with no type errors
 
 ## Notes

@@ -5,8 +5,11 @@ import {
   addSources,
   ask,
   Citation,
+  CitationStyle,
   createGroup,
   deleteGroup,
+  FormattedCitation,
+  formatCitations,
   getHealth,
   getIndexStatus,
   getSelectableSources,
@@ -25,8 +28,11 @@ import {
   SearchHit,
   SelectableSource,
   Stats,
+  StyleSelection,
   uploadFiles,
 } from "./api";
+import { distinctCitedSourcePaths, orderCitations } from "./bibliography";
+import ReferencesPanel from "./ReferencesPanel";
 
 type Mode = "ask" | "search";
 type ScopeMode = "archive" | "sources" | "group";
@@ -41,6 +47,15 @@ export default function Home() {
   const [citations, setCitations] = useState<Citation[]>([]);
   const [results, setResults] = useState<SearchHit[]>([]);
   const [streaming, setStreaming] = useState(false);
+
+  // Ask_View citation style selection (Req 6.1, 6.2). Defaults to "off"; when
+  // set to MLA/APA the Bibliography_Block below formats the cited sources
+  // client-side without re-running the question (Req 6.10).
+  const [citationStyle, setCitationStyle] = useState<StyleSelection>("off");
+  const [bibliography, setBibliography] = useState<FormattedCitation[]>([]);
+  // Monotonic id guarding against out-of-order formatCitations responses when
+  // the style flips quickly.
+  const bibRequestId = useRef(0);
 
   const [stats, setStats] = useState<Stats | null>(null);
   const [health, setHealth] = useState<Health | null>(null);
@@ -58,6 +73,8 @@ export default function Home() {
 
   // Groups manager UI state
   const [managerOpen, setManagerOpen] = useState(false);
+  // References / Citations panel UI state
+  const [referencesOpen, setReferencesOpen] = useState(false);
   const [newGroupName, setNewGroupName] = useState("");
   const [editGroupId, setEditGroupId] = useState<string>("");
 
@@ -139,6 +156,41 @@ export default function Home() {
       setSelectedGroupId("");
     }
   }, [groups, selectedGroupId]);
+
+  // Bibliography_Block: (re)format the distinct cited sources whenever the
+  // Style_Selector or the citation set changes — WITHOUT resubmitting the
+  // question (Req 6.10). When the style is "off" or there are no cited sources,
+  // the bibliography is cleared and nothing renders (Req 6.3, 6.5). A monotonic
+  // request id drops stale responses if the style is flipped again mid-flight.
+  useEffect(() => {
+    if (citationStyle === "off") {
+      setBibliography([]);
+      return;
+    }
+    const paths = distinctCitedSourcePaths(citations);
+    if (paths.length === 0) {
+      setBibliography([]);
+      return;
+    }
+    const style = citationStyle as CitationStyle;
+    const reqId = ++bibRequestId.current;
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await formatCitations(paths, style);
+        if (cancelled || reqId !== bibRequestId.current) return;
+        setBibliography(orderCitations(res.citations));
+      } catch {
+        if (cancelled || reqId !== bibRequestId.current) return;
+        // Formatting is best-effort and must never block the answer/Sources
+        // rendering (Req 6.11); on failure we simply show no block.
+        setBibliography([]);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [citationStyle, citations]);
 
   // Resolves the scope for a query. Ad-hoc selected sources take precedence
   // over a chosen group (matches backend resolution). Whole-archive sends
@@ -495,6 +547,29 @@ export default function Home() {
 
       {notice && <div className="muted" style={{ marginBottom: 16 }}>{notice}</div>}
 
+      {/* Citation style selector (Ask mode only). Off/MLA/APA, default Off
+          (Req 6.1, 6.2). Drives the Bibliography_Block below; the answer,
+          per-source panel, inline [n] markers, and Sources list all render
+          independent of this control (Req 6.11). */}
+      {mode === "ask" && (
+        <div className="row" style={{ marginBottom: 16, gap: 8, alignItems: "center" }}>
+          <label htmlFor="citation-style" className="muted">
+            Citation style
+          </label>
+          <select
+            id="citation-style"
+            aria-label="Citation style"
+            className="select"
+            value={citationStyle}
+            onChange={(e) => setCitationStyle(e.target.value as StyleSelection)}
+          >
+            <option value="off">Off</option>
+            <option value="MLA">MLA</option>
+            <option value="APA">APA</option>
+          </select>
+        </div>
+      )}
+
       {/* Synthesized summary */}
       {mode === "ask" && (summary || streaming) && (
         <div className="panel">
@@ -536,6 +611,29 @@ export default function Home() {
               </span>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Bibliography block: rendered beneath the Sources panel only when a
+          style is selected AND there is at least one formatted cited source
+          (Req 6.3, 6.4, 6.5). Title is "Works Cited" for MLA, "References" for
+          APA (Req 6.6, 6.7). Entries are ordered by the client-side comparator
+          (Req 6.8, 6.9). */}
+      {mode === "ask" && citationStyle !== "off" && bibliography.length > 0 && (
+        <div className="panel">
+          <div className="section-label">
+            {citationStyle === "MLA" ? "Works Cited" : "References"}
+          </div>
+          <div className="bibliography">
+            {bibliography.map((c) => (
+              <div className="bib-entry" key={c.source_path}>
+                <span className="bib-text">{c.text}</span>
+                {c.incomplete && (
+                  <span className="muted bib-incomplete"> (incomplete)</span>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
@@ -694,6 +792,18 @@ export default function Home() {
             )}
           </>
         )}
+      </div>
+
+      {/* References / Citations */}
+      <div className="panel">
+        <div
+          className="collapse-toggle section-label"
+          onClick={() => setReferencesOpen((o) => !o)}
+        >
+          <span>References / Citations</span>
+          <span className="caret">{referencesOpen ? "▲ hide" : "▼ open"}</span>
+        </div>
+        {referencesOpen && <ReferencesPanel />}
       </div>
 
       {/* Upload / index */}

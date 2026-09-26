@@ -10,6 +10,10 @@ export interface Citation {
   content_type?: string; // text | table | chart | figure | ocr
   matched_by: string[];
   rrf_score: number | null;
+  // Resolved label for the source (stored title else file name). The backend
+  // now includes this per citation; consumers fall back to source_file when
+  // absent so existing behavior is preserved (Req 9.3).
+  display_name?: string;
 }
 
 // Thrown when a query is refused because an index job is running (HTTP 409 with
@@ -315,6 +319,127 @@ export async function removeSources(id: string, sources: string[]): Promise<Grou
   if (!r.ok) {
     const detail = await r.json().catch(() => ({}));
     throw new Error(detail.detail || "failed to remove sources");
+  }
+  return r.json();
+}
+
+// ---------------------------------------------------------------------------
+// Citation formatting: reference metadata, formatting, and import
+// ---------------------------------------------------------------------------
+
+export type SourceType = "book" | "article" | "website" | "report" | "other";
+export type CitationStyle = "MLA" | "APA";
+// The Ask_View Style_Selector state: citations off, or a specific style.
+export type StyleSelection = "off" | "MLA" | "APA";
+export type ImportFormat = "bibtex" | "ris" | "csljson" | "verbatim";
+
+// The effective (stored merged with computed defaults) metadata for a source,
+// as returned by the Metadata_API. `display_name`, `missing_required`, and
+// `is_complete` are derived by the backend.
+export interface SourceMetadata {
+  source_path: string;
+  source_type: SourceType;
+  authors: string[];
+  title: string | null;
+  container: string | null;
+  publisher: string | null;
+  publication_date: string | null;
+  url: string | null;
+  access_date: string | null;
+  verbatim_overrides: Record<string, string>;
+  display_name: string;
+  missing_required: string[];
+  is_complete: boolean;
+}
+
+// A single formatted citation for one source in one style.
+export interface FormattedCitation {
+  source_path: string;
+  text: string;
+  incomplete: boolean;
+  missing_required: string[];
+  leading_element: string | null;
+}
+
+// The fields a client may update on a reference (derived/read-only fields such
+// as display_name, missing_required, is_complete, and verbatim_overrides are
+// excluded).
+export type UpdatableReferenceFields = Partial<
+  Pick<
+    SourceMetadata,
+    | "source_type"
+    | "authors"
+    | "title"
+    | "container"
+    | "publisher"
+    | "publication_date"
+    | "url"
+    | "access_date"
+  >
+>;
+
+// The backend routes use a `{source_path:path}` param, so slashes must be
+// preserved while each path segment is percent-encoded.
+function encodeSourcePath(sourcePath: string): string {
+  return sourcePath.split("/").map(encodeURIComponent).join("/");
+}
+
+export async function listReferences(): Promise<{ references: SourceMetadata[] }> {
+  const r = await fetch("/api/references");
+  if (!r.ok) throw new Error(`list references failed: ${r.status}`);
+  return r.json();
+}
+
+export async function getReference(sourcePath: string): Promise<SourceMetadata> {
+  const r = await fetch(`/api/references/${encodeSourcePath(sourcePath)}`);
+  if (!r.ok) throw new Error(`get reference failed: ${r.status}`);
+  return r.json();
+}
+
+export async function updateReference(
+  sourcePath: string,
+  fields: UpdatableReferenceFields
+): Promise<SourceMetadata> {
+  const r = await fetch(`/api/references/${encodeSourcePath(sourcePath)}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(fields),
+  });
+  if (!r.ok) {
+    const detail = await r.json().catch(() => ({}));
+    throw new Error(detail.detail || `update reference failed: ${r.status}`);
+  }
+  return r.json();
+}
+
+export async function formatCitations(
+  sourcePaths: string[],
+  style: CitationStyle
+): Promise<{ style: CitationStyle; citations: FormattedCitation[] }> {
+  const r = await fetch("/api/references/format", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ source_paths: sourcePaths, style }),
+  });
+  if (!r.ok) {
+    const detail = await r.json().catch(() => ({}));
+    throw new Error(detail.detail || `format citations failed: ${r.status}`);
+  }
+  return r.json();
+}
+
+export async function importReference(
+  sourcePath: string,
+  body: { format: ImportFormat; payload: string; entry?: string; style?: CitationStyle }
+): Promise<SourceMetadata> {
+  const r = await fetch(`/api/references/${encodeSourcePath(sourcePath)}/import`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  if (!r.ok) {
+    const detail = await r.json().catch(() => ({}));
+    throw new Error(detail.detail || `import reference failed: ${r.status}`);
   }
   return r.json();
 }
